@@ -30,6 +30,8 @@ end fn parse_price
 
 Chi usa `parse_price` sa dalla firma cosa riceve, cosa può fallire, quali condizioni valgono e che la funzione non tocca rete, file o stato.
 
+**Con un occhio di riguardo per le IA locali.** Tessera funziona anche con i grandi modelli, ma è pensato soprattutto per quelli piccoli che girano sul tuo computer (con Ollama o LM Studio): sono loro a guadagnare di più da un linguaggio in cui il compilatore ferma gli errori. In programma: generazione vincolata dalla grammatica e dati di addestramento verificati dal compilatore.
+
 ## Stato
 
 **Prototipo 0.1.** Esistono un interprete completo per il nucleo del linguaggio, i controlli statici e un compilatore verso WebAssembly per le funzioni numeriche pure. È scritto in Python per arrivare in fretta all'esperimento della fase 1; il compilatore definitivo verrà riscritto quando il linguaggio sarà stabile.
@@ -38,10 +40,12 @@ Chi usa `parse_price` sa dalla firma cosa riceve, cosa può fallire, quali condi
 |---|---|---|
 | 0 | Paper e sintassi | fatto |
 | 1 | Interprete, controlli statici, primo compilatore WebAssembly | fatto (0.1) |
-| 1 | Esperimento: Tessera contro Python con un modello linguistico | pronto da lanciare ([experiment/](experiment/)) |
+| 1 | Esperimento: Tessera contro Python con un modello linguistico | pronto; prime corse locali in corso ([experiment/](experiment/)) |
 | 2 | Nucleo: tipi statici, compilatore WebAssembly completo, capability di rete | da fare |
 | 3 | Addestramento di IA: tensori, derivazione, provenienza dei dati | da fare |
 | 4 | Verifica e domini: compilatore verificato, database, web, kernel | da fare |
+
+Stato completo, decisioni prese e prossimi passi: **[STATUS.it.md](STATUS.it.md)**. Direzione: Tessera pensato soprattutto per i modelli di IA locali (sezione 11 del paper).
 
 ## Provare
 
@@ -63,7 +67,7 @@ python -m tessera esegui examples/checkout.tsr
 | `python -m tessera prova file.tsr` | esegue le clausole `example` come test |
 | `python -m tessera compila file.tsr -o build` | produce `.wat` e `.wasm` |
 | `python -m tessera chiama file.tsr funzione arg... [--wasm]` | chiama una funzione, interpretata o compilata |
-| `python -m pytest tests` | 51 test, compresa la prova differenziale interprete contro WebAssembly |
+| `python -m pytest tests` | 52 test, compresa la prova differenziale interprete contro WebAssembly |
 
 Cosa controlla già il prototipo: effetti dichiarati, contratti, tipi ai confini delle funzioni, `edit` e `take`, overflow, divisione per zero, permessi sui file del `process`, `Secret` mai stampati, `Result` mai ignorati, `match` esaustivi, requisiti di piattaforma. Le regole sono in [spec/semantics.md](spec/semantics.md).
 

@@ -135,9 +135,13 @@ def esegui_python(file_codice, specifica):
 
 
 def main():
+    import contextlib
+    import io
     lingua, file_codice, file_specifica = sys.argv[1:4]
     specifica = json.loads(Path(file_specifica).read_text(encoding="utf-8"))
-    esito = esegui_tessera(file_codice, specifica) if lingua == "tessera" else esegui_python(file_codice, specifica)
+    # Il codice candidato potrebbe stampare: la sua uscita va scartata, altrimenti si mescola con il JSON.
+    with contextlib.redirect_stdout(io.StringIO()):
+        esito = esegui_tessera(file_codice, specifica) if lingua == "tessera" else esegui_python(file_codice, specifica)
     sys.stdout.write(json.dumps(esito, ensure_ascii=False))
 
 

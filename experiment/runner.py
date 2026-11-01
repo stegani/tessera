@@ -28,7 +28,7 @@ def esegui_compito(modello, task, lingua, max_tentativi, ripetizione):
         esito = sandbox.esegui(lingua, codice, task, task["visible"])
         superati = sum(r["outcome"] == "pass" for r in esito["results"])
         registro.update({"compile_error": esito.get("compile_error"), "visible_passed": superati,
-                         "visible_total": len(task["visible"])})
+                         "visible_total": len(task["visible"]), "code": codice})
         tentativi.append(registro)
         codice_finale = codice
         if not esito.get("compile_error") and superati == len(task["visible"]):

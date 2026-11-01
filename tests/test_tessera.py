@@ -300,3 +300,13 @@ def test_esperimento_distingue_difetti_silenziosi():
     esiti_tsr = [r["outcome"] for r in sandbox.esegui("tessera", tessera, task, task["hidden"])["results"]]
     assert esiti_py.count("wrong") == 2 and "error" not in esiti_py
     assert esiti_tsr.count("error") == 2 and "wrong" not in esiti_tsr
+
+
+def test_esperimento_codice_che_stampa():
+    """Un candidato che stampa non deve rompere la lettura dei risultati (bug trovato con qwen2.5:3b)."""
+    from experiment import sandbox
+    from experiment.__main__ import carica_compiti
+    task = {t["id"]: t for t in carica_compiti()}["word_count"]
+    codice = 'print("debug")\ndef word_count(text):\n    print(text)\n    return len([p for p in text.split(" ") if p])\n'
+    esito = sandbox.esegui("python", codice, task, task["visible"])
+    assert [r["outcome"] for r in esito["results"]] == ["pass", "pass"]

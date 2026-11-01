@@ -1,6 +1,6 @@
 # Esperimento della fase 1: Tessera contro Python
 
-L'esperimento misura la tesi del paper (sezione 12): **un modello linguistico scrive codice Tessera più corretto e più sicuro che in Python, pur non avendo mai visto Tessera prima?**
+L'esperimento misura la tesi del paper (sezione 13): **un modello linguistico scrive codice Tessera più corretto e più sicuro che in Python, pur non avendo mai visto Tessera prima?**
 
 ## Come funziona
 
@@ -41,13 +41,41 @@ python -m experiment run --model reference --reps 1
 
 Prova tutto il ciclo **senza costi**, usando le soluzioni di riferimento al posto del modello. Con `--model reference-broken` il primo tentativo è volutamente sbagliato, così si prova anche il ciclo di correzione.
 
+### Con un modello locale (consigliato)
+
+Tessera è pensato soprattutto per le IA locali, quindi l'esperimento parte da lì: niente costi, niente account, i dati restano sul tuo computer.
+
+Con [Ollama](https://ollama.com), che è il predefinito:
+
 ```bash
-python -m experiment run --yes
+python -m experiment run --model ollama:qwen3.8
 ```
 
-È l'**esperimento vero** con Claude Opus 5.5. Serve una chiave API: imposta la variabile `ANTHROPIC_API_KEY`, oppure accedi con `ant auth login`. Senza `--yes` il comando mostra solo quante chiamate farebbe.
+Con [LM Studio](https://lmstudio.ai): carica il modello, avvia il server locale (porta 1234) e usa il nome del modello mostrato da LM Studio.
 
-Opzioni utili: `--model claude-sonnet-5-5`, `--effort medium`, `--reps 1`, `--tasks parse_int_safe,checked_sum`. Se l'esperimento si interrompe, rilanciandolo con lo stesso `--out` riprende da dove si era fermato.
+```bash
+python -m experiment run --model lmstudio:NOME_DEL_MODELLO
+```
+
+Il nome dopo `ollama:` è quello mostrato da `ollama list`. Per Ollama il banco di prova chiede un contesto di 16 384 token; in LM Studio la lunghezza del contesto si imposta quando si carica il modello: almeno 8 192 token, perché il manuale di Tessera da solo ne occupa circa 1 700. I modelli locali sono più lenti dei servizi commerciali, ma il confronto resta equo: a parità di modello cambia solo il linguaggio.
+
+### Con un modello commerciale (facoltativo)
+
+Chi vuole può confrontare anche i modelli commerciali. Le chiamate hanno un costo, quindi il comando parte solo con `--yes`; senza, mostra quante chiamate farebbe.
+
+Qualsiasi servizio con un'interfaccia compatibile con OpenAI (OpenAI, Mistral, OpenRouter e altri): la chiave si legge da una variabile d'ambiente, di cui si passa solo il nome.
+
+```bash
+python -m experiment run --model compat:NOME_DEL_MODELLO --base-url https://api.openai.com/v1 --api-key-env OPENAI_API_KEY --yes
+```
+
+Claude, con l'SDK ufficiale di Anthropic: imposta `ANTHROPIC_API_KEY` oppure accedi con `ant auth login`.
+
+```bash
+python -m experiment run --model claude-opus-5-5 --yes
+```
+
+Opzioni utili: `--reps 1`, `--effort medium` (solo Claude), `--tasks parse_int_safe,checked_sum`. Se l'esperimento si interrompe, rilanciandolo con lo stesso `--out` riprende da dove si era fermato.
 
 I risultati finiscono in `experiment/results/` (esclusa da git): un file `.jsonl` con ogni tentativo e un rapporto `.md` con le tabelle. Per rigenerare il rapporto:
 
@@ -55,9 +83,11 @@ I risultati finiscono in `experiment/results/` (esclusa da git): un file `.jsonl
 python -m experiment report experiment/results/FILE.jsonl
 ```
 
-## Costo
+## Costo e tempi
 
-Con le impostazioni predefinite (Claude Opus 5.5, sforzo `high`, 20 esercizi × 2 linguaggi × 3 ripetizioni) si fanno da 120 a 360 chiamate. Il costo stimato è **intorno ai 10-20 dollari**: dipende soprattutto da quanto ragiona il modello. Con `--reps 1` il costo si riduce a circa un terzo. Il rapporto finale riporta il costo calcolato sui token effettivi.
+Con un modello locale l'esperimento non costa nulla, ma richiede tempo. Su un PC con una scheda RTX 4060 (8 GB), un modello da 3-4 miliardi di parametri sta tutto nella scheda video ed è veloce. qwen3.8 (27 miliardi) gira in parte sul processore, a circa 5 token al secondo: una ripetizione completa richiede circa 7 ore, da lanciare di notte.
+
+Con Claude Opus 5.5 (20 esercizi × 2 linguaggi × 3 ripetizioni, da 120 a 360 chiamate) il costo stimato è intorno ai 10-20 dollari. Il rapporto finale riporta il costo calcolato sui token effettivi per i modelli Claude.
 
 ## Correttezza e limiti
 

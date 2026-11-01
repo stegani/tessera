@@ -30,6 +30,7 @@ Anyone calling `parse_price` learns from the signature alone what it takes, how 
 
 ## Key ideas
 
+- **A special eye for local AI**: Tessera works with large models too, but it is designed above all for small local ones (run with Ollama or LM Studio), which gain the most from a language where the compiler stops mistakes. Grammar-constrained generation and compiler-verified training data are planned.
 - **Effects in the signature**: a function declares what it can do besides computing (`console`, `fs`, `net`, `gpu`, `llm`…); calling something with undeclared effects is rejected.
 - **Resources as unique permissions**: files, sockets, GPU memory and even a per-process IPv6 identity are linear values, acquired at start and released automatically.
 - **Ownership without lifetimes**: parameters are read-only by default; `edit` mutates and `take` consumes, and the word is repeated at the call site.
@@ -47,10 +48,12 @@ The full design is in the paper (in Italian): [docs/paper.md](docs/paper.md).
 |---|---|---|
 | 0 | Paper and syntax | done |
 | 1 | Interpreter, static checks, first WebAssembly compiler | done (0.1) |
-| 1 | Experiment: Tessera vs Python written by a language model | ready to run ([experiment/](experiment/)) |
+| 1 | Experiment: Tessera vs Python written by a language model | ready; first local runs in progress ([experiment/](experiment/)) |
 | 2 | Core: static types, full WebAssembly compiler, network capabilities | to do |
 | 3 | AI training: tensors, differentiation, data provenance | to do |
 | 4 | Verification and domains: verified compiler, databases, web, kernel | to do |
+
+Full status, the decisions taken so far and the next steps: **[STATUS.md](STATUS.md)**.
 
 ## Try it
 
@@ -72,7 +75,7 @@ python -m tessera run examples/checkout.tsr
 | `python -m tessera test file.tsr` | runs the `example` clauses as tests |
 | `python -m tessera build file.tsr -o build` | produces `.wat` and `.wasm` |
 | `python -m tessera call file.tsr function arg... [--wasm]` | calls a function, interpreted or compiled |
-| `python -m pytest tests` | 51 tests, including differential testing of the interpreter against WebAssembly |
+| `python -m pytest tests` | 52 tests, including differential testing of the interpreter against WebAssembly |
 
 The prototype already enforces: declared effects, contracts, types at function boundaries, `edit` and `take`, integer overflow, division by zero, file permissions granted by the `process`, `Secret` values never printed, `Result` values never ignored, exhaustive `match`, platform requirements. Messages and documentation are currently in Italian; the rules are in [spec/semantics.md](spec/semantics.md).
 

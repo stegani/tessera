@@ -77,6 +77,76 @@ class ModelloClaude:
         return esito
 
 
+class ModelloOllama:
+    """Un modello locale servito da Ollama (http://localhost:11434), senza costi e senza account."""
+
+    def __init__(self, nome, indirizzo="http://localhost:11434", contesto=16384, limite_secondi=1800):
+        self.nome = nome
+        self.modello = f"ollama:{nome}"
+        self.indirizzo = indirizzo.rstrip("/")
+        # Il contesto predefinito di Ollama e' corto: il manuale di Tessera piu' i tentativi verrebbero troncati.
+        self.contesto = contesto
+        self.limite_secondi = limite_secondi
+
+    def rispondi(self, sistema, messaggi, **_):
+        import json
+        import urllib.request
+        corpo = {
+            "model": self.nome,
+            "messages": [{"role": "system", "content": sistema}] + [
+                {"role": m["role"], "content": m["content"]} for m in messaggi],
+            "stream": False,
+            "options": {"num_ctx": self.contesto},
+        }
+        richiesta = urllib.request.Request(f"{self.indirizzo}/api/chat", data=json.dumps(corpo).encode("utf-8"),
+                                           headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(richiesta, timeout=self.limite_secondi) as r:
+            dati = json.loads(r.read().decode("utf-8"))
+        testo = dati.get("message", {}).get("content", "")
+        esito = Risposta(testo=testo, contenuto=testo, input_tokens=dati.get("prompt_eval_count", 0) or 0,
+                         output_tokens=dati.get("eval_count", 0) or 0, modello=self.modello)
+        if dati.get("done_reason") == "length":
+            esito.note.append("context or output limit reached")
+        return esito
+
+
+class ModelloCompatibileOpenAI:
+    """Un modello locale dietro un'interfaccia compatibile con OpenAI (/v1/chat/completions):
+    LM Studio (predefinito http://localhost:1234/v1), ma anche Ollama, llama.cpp server, vLLM."""
+
+    def __init__(self, nome, indirizzo="http://localhost:1234/v1", limite_secondi=1800, prefisso="lmstudio", chiave=None):
+        self.nome = nome
+        self.modello = f"{prefisso}:{nome}"
+        self.indirizzo = indirizzo.rstrip("/")
+        self.limite_secondi = limite_secondi
+        self.chiave = chiave        # solo per i servizi remoti; letta da una variabile d'ambiente, mai scritta su disco
+
+    def rispondi(self, sistema, messaggi, **_):
+        import json
+        import urllib.request
+        corpo = {
+            "model": self.nome,
+            "messages": [{"role": "system", "content": sistema}] + [
+                {"role": m["role"], "content": m["content"]} for m in messaggi],
+            "stream": False,
+        }
+        intestazioni = {"Content-Type": "application/json"}
+        if self.chiave:
+            intestazioni["Authorization"] = f"Bearer {self.chiave}"
+        richiesta = urllib.request.Request(f"{self.indirizzo}/chat/completions", data=json.dumps(corpo).encode("utf-8"),
+                                           headers=intestazioni)
+        with urllib.request.urlopen(richiesta, timeout=self.limite_secondi) as r:
+            dati = json.loads(r.read().decode("utf-8"))
+        scelta = (dati.get("choices") or [{}])[0]
+        testo = (scelta.get("message") or {}).get("content") or ""
+        uso = dati.get("usage") or {}
+        esito = Risposta(testo=testo, contenuto=testo, input_tokens=uso.get("prompt_tokens", 0) or 0,
+                         output_tokens=uso.get("completion_tokens", 0) or 0, modello=self.modello)
+        if scelta.get("finish_reason") == "length":
+            esito.note.append("context or output limit reached")
+        return esito
+
+
 class ModelloRiferimento:
     """Restituisce le soluzioni di riferimento. Con sbaglia_prima=True il primo tentativo contiene un errore
     di sintassi, per provare anche il ciclo di correzione."""

@@ -10,11 +10,16 @@
 import argparse
 import datetime
 import json
+import os
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 from . import references, sandbox
-from .models import MODELLO_PREDEFINITO, PREZZI, ModelloClaude, ModelloRiferimento
+from .models import PREZZI, ModelloClaude, ModelloCompatibileOpenAI, ModelloOllama, ModelloRiferimento
+
+# Tessera e' pensato per i modelli locali: il punto di partenza e' un modello servito da Ollama.
+MODELLO_PREDEFINITO = "ollama:qwen3.8"
 from .report import rapporto
 from .runner import esegui_esperimento
 
@@ -63,12 +68,44 @@ def comando_check(args):
     return 1 if falliti else 0
 
 
+def tieni_sveglio():
+    """Su Windows impedisce la sospensione per inattivita' finche' questo processo e' in esecuzione.
+    Non cambia le impostazioni del sistema: l'effetto finisce con il processo."""
+    if sys.platform == "win32":
+        import ctypes
+        ES_CONTINUOUS, ES_SYSTEM_REQUIRED = 0x80000000, 0x00000001
+        ctypes.windll.kernel32.SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED)
+
+
 def comando_run(args):
     tasks = carica_compiti(args.tasks)
     lingue = args.langs.split(",")
     chiamate = len(tasks) * len(lingue) * args.reps
+    prefisso, _, nome = args.model.partition(":")
     if args.model in ("reference", "reference-broken"):
         modello = ModelloRiferimento(sbaglia_prima=args.model == "reference-broken")
+    elif prefisso == "ollama":
+        modello = ModelloOllama(nome, indirizzo=args.base_url or "http://localhost:11434")
+        print(f"Modello locale {nome} via Ollama: nessun costo, {chiamate}-{chiamate * args.max_attempts} chiamate.")
+    elif prefisso == "lmstudio":
+        modello = ModelloCompatibileOpenAI(nome, indirizzo=args.base_url or "http://localhost:1234/v1")
+        print(f"Modello locale {nome} via LM Studio: nessun costo, {chiamate}-{chiamate * args.max_attempts} chiamate.")
+    elif prefisso == "compat":
+        # Qualsiasi servizio compatibile con OpenAI, locale o commerciale.
+        if not args.base_url:
+            sys.exit("con compat: serve --base-url, per esempio https://api.openai.com/v1")
+        chiave = os.environ.get(args.api_key_env) if args.api_key_env else None
+        if args.api_key_env and not chiave:
+            sys.exit(f"la variabile d'ambiente {args.api_key_env} non e' impostata")
+        remoto = urlparse(args.base_url).hostname not in ("localhost", "127.0.0.1", "::1")
+        print(f"Modello {nome} su {args.base_url}: {chiamate}-{chiamate * args.max_attempts} chiamate.")
+        if remoto and not args.yes:
+            print("E' un servizio remoto e le chiamate possono avere un costo. Rilancia con --yes per avviare.")
+            return 0
+        modello = ModelloCompatibileOpenAI(nome, indirizzo=args.base_url, prefisso="compat", chiave=chiave)
+    elif not args.model.startswith("claude-"):
+        sys.exit(f"modello '{args.model}' non riconosciuto: usa ollama:NOME, lmstudio:NOME, compat:NOME con --base-url, "
+                 f"o un modello Claude (claude-...)")
     else:
         if args.model not in PREZZI:
             print(f"attenzione: prezzo di {args.model} sconosciuto, il costo non sara' stimato")
@@ -78,6 +115,7 @@ def comando_run(args):
             print("Le chiamate hanno un costo. Rilancia con --yes per avviare l'esperimento.")
             return 0
         modello = ModelloClaude(args.model, args.effort, fallback=not args.no_fallback)
+    tieni_sveglio()
     uscita = Path(args.out) if args.out else (
         QUI / "results" / f"{datetime.datetime.now():%Y%m%d-%H%M%S}-{modello.modello}.jsonl")
     esegui_esperimento(modello, tasks, lingue, args.reps, args.max_attempts, uscita)
@@ -105,7 +143,10 @@ def main(argv=None):
 
     p = sotto.add_parser("run", help="esegue l'esperimento")
     p.add_argument("--model", default=MODELLO_PREDEFINITO,
-                   help=f"modello Claude (predefinito {MODELLO_PREDEFINITO}), oppure reference / reference-broken")
+                   help=f"ollama:NOME (predefinito {MODELLO_PREDEFINITO}), lmstudio:NOME, compat:NOME con --base-url, "
+                        f"un modello Claude (claude-opus-5-5, ...), oppure reference / reference-broken")
+    p.add_argument("--base-url", help="indirizzo del server (per compat:, o per cambiare quello di Ollama o LM Studio)")
+    p.add_argument("--api-key-env", help="nome della variabile d'ambiente con la chiave del servizio (per compat:)")
     p.add_argument("--effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
     p.add_argument("--langs", default="tessera,python")
     p.add_argument("--tasks", default="all", help="elenco separato da virgole, oppure all")

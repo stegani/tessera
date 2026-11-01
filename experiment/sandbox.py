@@ -74,4 +74,8 @@ def esegui(lingua, codice, task, test):
         dettaglio = (uscita.stderr or "").strip().splitlines()[-1:] or ["no output"]
         return {"compile_error": None,
                 "results": [{"outcome": "error", "error": f"runner crashed: {dettaglio[0]}"} for _ in test]}
-    return json.loads(uscita.stdout)
+    try:
+        return json.loads(uscita.stdout)
+    except json.JSONDecodeError:
+        return {"compile_error": None,
+                "results": [{"outcome": "error", "error": "unreadable runner output"} for _ in test]}

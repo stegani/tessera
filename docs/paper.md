@@ -15,7 +15,7 @@ Tessera sposta questa responsabilità sul compilatore. Le scelte principali sono
 - **risorse trattate come permessi unici e non copiabili**, compresa un'identità di rete IPv6 per ogni processo;
 - **contratti verificati formalmente**, che rendono dimostrabili le proprietà critiche.
 
-Il paper descrive i principi, l'architettura e il modello di sicurezza, e propone un esperimento per misurare se un modello linguistico scrive codice Tessera corretto più spesso e con meno risorse rispetto a Python.
+Il paper descrive i principi, l'architettura e il modello di sicurezza, e propone un esperimento per misurare se un modello linguistico scrive codice Tessera corretto più spesso e con meno risorse rispetto a Python. Un'attenzione particolare va ai modelli locali: più piccoli e meno precisi, sono quelli che da un linguaggio esplicito e controllato dal compilatore possono guadagnare di più.
 
 Il nome viene dalla *tessera* latina, che era insieme il contrassegno di riconoscimento, la parola d'ordine e il tassello del mosaico: identità, sicurezza e modularità, i tre pilastri del linguaggio. I file sorgente hanno estensione `.tsr`.
 
@@ -57,7 +57,7 @@ Tessera ottimizza tre cose, in quest'ordine: sicurezza per costruzione, efficien
 - **Sintassi compatta a ogni costo.** Meno caratteri non significa meno token né meno errori (sezione 3).
 - **Flessibilità espressiva.** Non ci sono metaprogrammazione arbitraria, `eval`, reflection o caricamento dinamico di codice.
 - **Compatibilità con un linguaggio esistente.** La sintassi somiglia a Rust e Python per sfruttare ciò che i modelli sanno già, ma non ne è un sovrainsieme.
-- **Inattaccabilità assoluta.** L'obiettivo è ridurre la superficie d'attacco a pochi punti piccoli, noti e verificati (sezione 13).
+- **Inattaccabilità assoluta.** L'obiettivo è ridurre la superficie d'attacco a pochi punti piccoli, noti e verificati (sezione 14).
 
 ## 3. Principi di progetto
 
@@ -116,7 +116,7 @@ La sintassi è definita da una grammatica formale LALR(1), senza conflitti, veri
 - `return` sempre esplicito, errori come valori (`Result`, `?`);
 - assenti di proposito: classi, eccezioni, `null`, macro, `eval`, `import *`.
 
-Il prezzo è misurato. Per scrivere la stessa funzione Tessera richiede circa il 13% di token in più di Rust e il 28% in più di Python, stimati con tokenizer pubblici, perché dichiara anche effetti, contratti ed esempi. Che il costo si ripaghi in lettura e in errori evitati è proprio ciò che l'esperimento della sezione 12 deve verificare.
+Il prezzo è misurato. Per scrivere la stessa funzione Tessera richiede circa il 13% di token in più di Rust e il 28% in più di Python, stimati con tokenizer pubblici, perché dichiara anche effetti, contratti ed esempi. Che il costo si ripaghi in lettura e in errori evitati è proprio ciò che l'esperimento della sezione 13 deve verificare.
 
 ## 4. Architettura
 
@@ -424,7 +424,36 @@ La funzione che esporta i pesi accetta solo un valore di tipo `Evaluated[Weights
 
 Tessera non incorpora i Transformer né alcuna architettura: offre programmi derivabili generali. Strutture dinamiche come mixture of experts, ricorrenza, memoria esterna e modelli neuro-simbolici sono codice normale con flusso di controllo, non grafi statici. Per non ripartire da zero, Tessera importa pesi in formati di soli dati come safetensors e chiama kernel esistenti (cuDNN, FlashAttention) tramite dichiarazioni esterne con contratto. Il modulo `qpu` permetterà in futuro modelli ibridi classico-quantistici con la stessa derivazione automatica.
 
-## 11. Lavori correlati
+## 11. Tessera per le IA locali
+
+Tessera è pensato anche per i grandi modelli, ma il suo terreno più promettente sono probabilmente i modelli locali: più piccoli, con meno contesto e meno precisi, sono quelli che guadagnano di più da un linguaggio in cui il compilatore ferma gli errori.
+
+### 11.1 Perché i modelli locali
+
+- **Sbagliano di più.** Un modello da pochi miliardi di parametri non ricorda le eccezioni e le trappole di un linguaggio come Python. Regole esplicite e controllate dal compilatore compensano ciò che manca alla sua memoria.
+- **Hanno poco contesto e generano lentamente.** Ogni token del manuale e del codice pesa. L'efficienza in token, secondaria per un modello in cloud, diventa decisiva.
+- **I tentativi costano solo tempo.** Il ciclo "scrivo, compilo, correggo" è gratuito e si può sfruttare a fondo, purché gli errori siano precisi.
+- **Privacy e autonomia.** Un agente che gira sul computer dell'utente ed esegue azioni è proprio il caso in cui effetti dichiarati, permessi sui file e dati non fidati servono di più.
+
+### 11.2 Cosa si può fare solo in locale
+
+1. **Generazione vincolata dalla grammatica.** Con un modello locale si possono scartare, mentre il modello genera, i token che violerebbero la grammatica. La grammatica di Tessera è LALR(1) e si presta a questa conversione: il codice prodotto sarebbe sintatticamente corretto per costruzione. Le API dei modelli in cloud non lo consentono.
+2. **Insegnare Tessera al modello.** Il limite principale di un linguaggio nuovo è che nessun modello lo conosce. Un modello aperto si può adattare con tecniche leggere come LoRA, usando programmi generati automaticamente e filtrati dal compilatore: restano solo quelli che compilano e superano i test. Il compilatore diventa il controllo di qualità dei dati di addestramento.
+
+### 11.3 Scelte di progetto per i modelli piccoli
+
+| Scelta | Effetto atteso |
+| --- | --- |
+| Manuale compatto, intorno ai 700 token | lascia spazio al compito in contesti ridotti |
+| Messaggi d'errore brevi, in inglese, con la correzione esatta | correzioni più rapide e precise dopo ogni errore |
+| Effetto `llm` collegato ai modelli locali | agenti locali con permessi dichiarati e output non fidato |
+| Prova A/B sulle chiusure con nome (`end if` contro `end`) | meno token, se non aumentano gli errori |
+
+### 11.4 Prime misure
+
+L'esperimento della sezione 13 gira anche con modelli locali, tramite Ollama. Nella prima prova qwen3.8, un modello da 27 miliardi di parametri eseguito su un normale PC, ha risolto un esercizio di validazione dell'input in Tessera al secondo tentativo e in Python al primo, superando in entrambi i linguaggi tutti i 10 test nascosti, pur non avendo mai visto Tessera prima. Il confronto sistematico tra modelli piccoli (3-4 miliardi di parametri) e grandi verificherà l'ipotesi centrale di questa sezione: il vantaggio di Tessera cresce quando il modello si rimpicciolisce.
+
+## 12. Lavori correlati
 
 Nessuna delle idee di Tessera è nuova se presa da sola; la novità sta nel combinarle con l'IA come autore principale e come avversario.
 
@@ -443,11 +472,11 @@ Per l'addestramento di IA, Tessera riprende da JAX la derivazione di funzioni pu
 
 Nessun linguaggio esaminato tratta l'output dei modelli linguistici come tipo non fidato, né lega l'identità di rete del processo a un tipo lineare con identità crittografica.
 
-## 12. Metodologia di valutazione
+## 13. Metodologia di valutazione
 
 La tesi del paper si misura prima di costruire il compilatore completo: se un modello non scrive Tessera meglio di Python, le scelte di progetto vanno riviste.
 
-### 12.1 L'esperimento
+### 13.1 L'esperimento
 
 1. Scrivere la specifica della grammatica e del nucleo, in 2-3 pagine.
 2. Realizzare un interprete minimo, sufficiente a eseguire i programmi e controllarne il risultato.
@@ -455,7 +484,7 @@ La tesi del paper si misura prima di costruire il compilatore completo: se un mo
 4. Far risolvere ogni esercizio allo stesso modello in Python e in Tessera, con la specifica di Tessera nel prompt e senza esempi aggiuntivi.
 5. Ripetere ogni prova più volte per avere dati statisticamente significativi.
 
-### 12.2 Metriche
+### 13.2 Metriche
 
 | Metrica | Cosa misura |
 | --- | --- |
@@ -467,11 +496,11 @@ La tesi del paper si misura prima di costruire il compilatore completo: se un mo
 
 L'ultima metrica misura direttamente la tesi di sicurezza: si confronta quante vulnerabilità un'IA attaccante trova nei programmi Python e in quelli Tessera che risolvono lo stesso esercizio.
 
-### 12.3 Criteri di successo
+### 13.3 Criteri di successo
 
 L'esperimento dà ragione al progetto se Tessera, pur senza dati di addestramento, eguaglia Python nella correttezza al primo tentativo e lo supera in tentativi necessari, token di contesto e vulnerabilità residue.
 
-## 13. Limiti e rischi
+## 14. Limiti e rischi
 
 Tessera riduce la superficie d'attacco, ma non la annulla, e il progetto stesso ha rischi concreti di fallimento.
 
@@ -485,13 +514,13 @@ Tessera riduce la superficie d'attacco, ma non la annulla, e il progetto stesso 
 
 **Rischi del progetto**
 
-- **Assenza di dati di addestramento.** I modelli conoscono Python, non Tessera. La grammatica piccola e la sintassi familiare mitigano il problema, ma potrebbero non bastare: è la prima cosa che l'esperimento della sezione 12 deve verificare.
-- **Dimensione del lavoro.** Un linguaggio universale con compilatore verificato richiede anni. L'ordine delle fasi (sezione 14) serve a produrre risultati utili prima della fine.
+- **Assenza di dati di addestramento.** I modelli conoscono Python, non Tessera. La grammatica piccola e la sintassi familiare mitigano il problema, ma potrebbero non bastare: è la prima cosa che l'esperimento della sezione 13 deve verificare.
+- **Dimensione del lavoro.** Un linguaggio universale con compilatore verificato richiede anni. L'ordine delle fasi (sezione 15) serve a produrre risultati utili prima della fine.
 - **Costo della verifica.** Le dimostrazioni possono allungare molto la compilazione e rendere lento il ciclo di correzione.
 - **Rigidità.** Regole severe possono rendere alcuni programmi legittimi difficili da esprimere, spingendo verso un uso eccessivo di `unsafe` o di librerie esterne.
 - **Ecosistema.** Senza interoperabilità con C, Python e JavaScript, nessun linguaggio nuovo viene adottato; con troppa interoperabilità, le garanzie si fermano al confine.
 
-## 14. Roadmap
+## 15. Roadmap
 
 Il progetto procede in quattro fasi, e ciascuna parte solo se la precedente supera un cancello misurabile; l'addestramento di IA è il primo dominio dopo il nucleo.
 
@@ -499,11 +528,11 @@ Il progetto procede in quattro fasi, e ciascuna parte solo se la precedente supe
 
 L'addestramento viene prima di database e web perché è dove gli errori costano di più (ore di GPU) e dove le garanzie di Tessera si misurano meglio. Il compilatore verificato chiude il percorso: è il lavoro più lungo, e ha senso solo quando il linguaggio si è stabilizzato.
 
-## 15. Conclusioni
+## 16. Conclusioni
 
 Un linguaggio progettato per essere scritto da IA e attaccato da IA deve rendere tutto esplicito e tutto verificabile da una macchina, e queste due proprietà servono sia all'efficienza sia alla sicurezza.
 
-Tessera combina idee già sperimentate separatamente (proprietà dei dati, effetti tipizzati, capability, verifica formale) in un unico nucleo, e aggiunge tre elementi nuovi: l'output dei modelli linguistici come tipo non fidato, l'identità di rete del processo come risorsa lineare con identità crittografica, e dati di addestramento che portano nel tipo la propria provenienza. Il passo successivo non è il compilatore, ma l'esperimento della sezione 12: dirà con dati misurati se la tesi regge.
+Tessera combina idee già sperimentate separatamente (proprietà dei dati, effetti tipizzati, capability, verifica formale) in un unico nucleo, e aggiunge tre elementi nuovi: l'output dei modelli linguistici come tipo non fidato, l'identità di rete del processo come risorsa lineare con identità crittografica, e dati di addestramento che portano nel tipo la propria provenienza. Il passo successivo non è il compilatore, ma l'esperimento della sezione 13: dirà con dati misurati se la tesi regge.
 
 ## Riferimenti
 
@@ -536,4 +565,8 @@ Pagine ufficiali dei progetti e degli standard citati; i collegamenti non sono s
 
 ## Come citare
 
-Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA*, 2026. DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820) · https://github.com/stegani/tessera
+Tessera è un'opera originale di Stefano Stegani, distribuita con licenza Apache 2.0: si può riusare citando sempre l'autore.
+
+Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA*, 2026. [github.com/stegani/tessera](https://github.com/stegani/tessera)
+
+DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820), archiviato su Zenodo il 1 novembre 2026. Il DOI punta sempre all'ultima versione; la versione 0.1.0 ha il DOI [10.5281/zenodo.23855821](https://doi.org/10.5281/zenodo.23855821).

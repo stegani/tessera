@@ -1,6 +1,6 @@
 # Copyright 2026 Stefano Stegani
 # SPDX-License-Identifier: Apache-2.0
-"""Dal file dei risultati alle metriche del paper (sezione 12.2), in una tabella Markdown."""
+"""Dal file dei risultati alle metriche del paper (sezione 13.2), in una tabella Markdown."""
 import json
 from pathlib import Path
 
