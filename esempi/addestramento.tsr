@@ -1,0 +1,48 @@
+-- Addestramento: dimensioni dei tensori nel tipo, derivazione di funzioni pure,
+-- distribuzione dichiarata, budget di memoria verificato in compilazione.
+module laboratorio.classificatore
+profile: compute
+
+from std.tensor import Tensor, relu, softmax, cross_entropy, grad
+from std.data import Dataset, Batch, Licensed
+
+pub type Params[d_in, d_hidden, d_out] do
+  w1: Tensor[bf16, d_in, d_hidden]
+  w2: Tensor[bf16, d_hidden, d_out]
+end type Params
+
+fn forward[b](params: Params[784, 256, 10], x: Tensor[bf16, b, 784]) -> Tensor[bf16, b, 10]
+  effects: none
+do
+  let h = relu(x @ params.w1)
+  return h @ params.w2
+end fn forward
+
+fn loss[b](params: Params[784, 256, 10], batch: Batch[b]) -> f32
+  effects: none
+do
+  return cross_entropy(forward(params, batch.inputs), batch.targets)
+end fn loss
+
+pub fn train_step[b](edit params: Params[784, 256, 10], batch: Batch[b] @ data, rate: f32)
+  effects: gpu
+  requires: rate > 0.0
+  budget: memory 80GB per device
+do
+  let g = grad(loss)(params, batch)
+  params.w1 -= rate * g.w1
+  params.w2 -= rate * g.w2
+end fn train_step
+
+pub fn train(take data: Dataset[Batch[512], Licensed], steps: i64) -> Params[784, 256, 10]
+  effects: gpu, rng
+  requires: steps > 0
+do
+  var params = Params.random(seed: 42)
+  var step = 0
+  while step < steps do
+    train_step(edit params, data.next(), 0.001)
+    step += 1
+  end while
+  return params
+end fn train

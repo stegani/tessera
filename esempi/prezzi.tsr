@@ -1,0 +1,48 @@
+-- Funzioni pure, errori come valori, contratti ed esempi.
+module negozio.prezzi
+
+from negozio.testo import split_once, parse_digits
+
+pub type Cents = i64
+
+pub type ParseError do
+  case Empty
+  case NotANumber
+  case TooManyDecimals(found: i32)
+end type ParseError
+
+pub fn parse_price(text: Str) -> Result[Cents, ParseError]
+  doc: "Converte \"12.50\" in 1250 centesimi."
+  effects: none
+  requires: text.len() > 0
+  ensures: result is Ok(c) implies c >= 0
+  example: parse_price("12.50") == Ok(Cents(1250))
+  example: parse_price("abc") == Err(ParseError.NotANumber)
+do
+  let (units, decimals) = split_once(text, ".")
+  let whole = parse_digits(units)?
+  if decimals.len() > 2 do
+    return Err(ParseError.TooManyDecimals(found: decimals.len()))
+  end if
+  let fraction = parse_digits(decimals)?
+  return Ok(Cents(whole * 100 + fraction))
+end fn parse_price
+
+pub fn total(prices: List[Cents]) -> Cents
+  effects: none
+  ensures: result >= Cents(0)
+do
+  var sum = Cents(0)
+  for price in prices do
+    sum += price
+  end for
+  return sum
+end fn total
+
+pub fn discount(price: Cents, percent: i32) -> Cents
+  effects: none
+  requires: percent >= 0 and percent <= 100
+  example: discount(Cents(1000), 10) == Cents(900)
+do
+  return price - price * percent / 100
+end fn discount

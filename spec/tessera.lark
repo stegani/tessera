@@ -1,0 +1,208 @@
+// Grammatica di Tessera, bozza 0.1 (01/11/2026).
+// Formato: EBNF di Lark, parser LALR(1). Le decisioni sono spiegate in spec/sintassi.md.
+//
+// Regole che la grammatica impone da sola:
+// - ogni dichiarazione e ogni istruzione comincia con una parola chiave o con un'espressione;
+// - i nomi di tipo sono in PascalCase, tutti gli altri nomi in snake_case;
+// - le clausole della firma hanno un ordine fisso;
+// - "and" e "or" non si mescolano senza parentesi; i confronti non si concatenano;
+// - i blocchi si chiudono con "end" + parola chiave (+ nome per fn, type, process).
+
+start: _NL? module_decl (item)*
+
+// ---------- modulo e import ----------
+
+module_decl: "module" path _NL ("profile" ":" NAME _NL)?
+path: NAME ("." NAME)*
+
+?item: import_decl
+     | fn_decl
+     | type_decl
+     | type_alias
+     | process_decl
+     | extern_decl
+     | const_decl
+
+import_decl: "from" path "import" name_list _NL
+name_list: import_name ("," import_name)*
+?import_name: NAME | TYPE_NAME
+
+const_decl: PUB? "const" NAME ":" type "=" expr _NL
+
+// ---------- funzioni ----------
+
+fn_decl: PUB? CRITICAL? "fn" NAME generic_params? "(" params? ")" return_type? _NL fn_clauses "do" block "end" "fn" NAME _NL
+return_type: "->" type
+
+generic_params: "[" generic_param ("," generic_param)* "]"
+generic_param: TYPE_NAME (":" TYPE_NAME)?   // T oppure T: Interfaccia
+             | NAME                          // dimensione di tensore: batch, seq
+
+params: _NL? param ("," _NL? param)* ","? _NL?
+param: MODE? NAME ":" type shard?
+MODE.2: "edit" | "take"
+shard: "@" NAME
+
+// Ordine fisso: doc, effects, requires, ensures, example, budget.
+fn_clauses: doc_clause? effects_clause requires_clause* ensures_clause* example_clause* budget_clause?
+
+doc_clause: "doc" ":" STRING _NL
+effects_clause: "effects" ":" (NONE | effect ("," effect)*) _NL
+effect: NAME ("." NAME)* call_args?
+requires_clause: "requires" ":" expr _NL
+ensures_clause: "ensures" ":" expr _NL
+example_clause: "example" ":" expr _NL
+budget_clause: "budget" ":" quantity ("," quantity)* _NL
+quantity: NAME (QUANTITY | INT) ("per" NAME)?
+
+// ---------- tipi ----------
+
+?type: named_type | fn_type
+named_type: (TYPE_NAME | PRIMITIVE) type_args?
+type_args: "[" type_arg ("," type_arg)* "]"
+?type_arg: type | INT | NAME
+fn_type: "fn" "(" (type ("," type)*)? ")" "->" type
+
+type_alias: PUB? "type" TYPE_NAME generic_params? "=" type _NL
+
+// Senza invarianti "do" chiude la riga d'intestazione; con invarianti va su una riga propria.
+type_decl: PUB? "type" TYPE_NAME generic_params? (_NL invariant_clause+)? "do" _NL type_member* "end" "type" TYPE_NAME _NL
+invariant_clause: "invariant" ":" expr _NL
+?type_member: field_decl | variant_decl
+field_decl: NAME ":" type _NL
+variant_decl: "case" TYPE_NAME ("(" fields ")")? _NL
+fields: field ("," field)*
+field: NAME ":" type
+
+// ---------- processi ----------
+
+process_decl: "process" NAME _NL effects_clause grants_clause? limits_clause? platform_clause? "do" block "end" "process" NAME _NL
+grants_clause: "grants" ":" _NL? grant ("," _NL? grant)* _NL
+grant: NAME ("." NAME)* call_args?
+limits_clause: "limits" ":" quantity ("," quantity)* _NL
+// Requisiti della macchina, controllati dalla sentinella prima dell'avvio.
+platform_clause: "platform" ":" NAME ("," NAME)* _NL
+
+// ---------- funzioni esterne (C, Python, JavaScript) ----------
+
+extern_decl: "extern" STRING "fn" NAME "(" params? ")" return_type? _NL effects_clause requires_clause* ensures_clause* "end" "extern" _NL
+
+// ---------- istruzioni ----------
+
+block: _NL statement*
+
+?statement: let_stmt
+          | var_stmt
+          | return_stmt
+          | if_stmt
+          | for_stmt
+          | while_stmt
+          | match_stmt
+          | unsafe_stmt
+          | break_stmt
+          | continue_stmt
+          | simple_stmt
+
+let_stmt: "let" pattern (":" type)? "=" expr _NL
+var_stmt: "var" NAME (":" type)? "=" expr _NL
+return_stmt: "return" expr? _NL
+break_stmt: "break" _NL
+continue_stmt: "continue" _NL
+// Assegnazione o chiamata: chi riceve l'assegnazione si controlla dopo il parsing.
+simple_stmt: expr (ASSIGN_OP expr)? _NL
+ASSIGN_OP: "=" | "+=" | "-=" | "*=" | "/="
+
+if_stmt: "if" expr "do" block elif_part* else_part? "end" "if" _NL
+elif_part: "else" "if" expr "do" block
+else_part: "else" block
+
+for_stmt: "for" pattern "in" expr "do" block "end" "for" _NL
+while_stmt: "while" expr "do" block "end" "while" _NL
+
+match_stmt: "match" expr "do" _NL case_arm+ "end" "match" _NL
+case_arm: "case" pattern ("if" expr)? ":" block
+
+unsafe_stmt: "unsafe" "do" block "end" "unsafe" _NL
+
+// ---------- pattern ----------
+
+?pattern: NAME                                   -> bind_pattern
+        | "_"                                    -> wildcard_pattern
+        | literal                                -> literal_pattern
+        | TYPE_NAME ("." TYPE_NAME)? ("(" pattern ("," pattern)* ")")? -> variant_pattern
+        | "(" pattern ("," pattern)+ ")"         -> tuple_pattern
+
+// ---------- espressioni (dalla precedenza piu' bassa alla piu' alta) ----------
+
+?expr: implies_expr
+     | lambda
+
+lambda: "fn" "(" (lambda_param ("," lambda_param)*)? ")" "=>" expr
+lambda_param: NAME (":" type)?
+
+?implies_expr: logic_expr ("implies" logic_expr)?
+
+// "and" e "or" non si mescolano: (a and b) or c, mai a and b or c.
+?logic_expr: not_expr | and_chain | or_chain
+and_chain: not_expr "and" not_expr | and_chain "and" not_expr
+or_chain: not_expr "or" not_expr | or_chain "or" not_expr
+
+?not_expr: "not" not_expr -> not_op
+         | comparison
+
+// Un solo confronto per espressione: 0 <= x and x < n, mai 0 <= x < n.
+?comparison: range_expr (COMP_OP range_expr)?
+           | range_expr "is" pattern -> is_test
+COMP_OP: "==" | "!=" | "<=" | ">=" | "<" | ">" | "in"
+
+?range_expr: sum (".." sum)?
+
+?sum: product | sum ADD_OP product -> binop
+ADD_OP: "+" | "-"
+
+?product: unary | product MUL_OP unary -> binop
+MUL_OP: "*" | "/" | "%" | "@"
+
+?unary: "-" unary -> neg
+      | postfix
+
+?postfix: atom
+        | postfix call_args              -> call
+        | postfix "[" expr "]"           -> index
+        | postfix "." NAME               -> field
+        | postfix "." TYPE_NAME          -> variant_ref   // ParseError.NotANumber
+        | postfix "?"                    -> try_op
+
+call_args: "(" _NL? (arg ("," _NL? arg)* ","? _NL?)? ")"
+arg: (NAME ":")? MODE? expr
+
+?atom: literal
+     | NAME                              -> var
+     | TYPE_NAME                         -> type_ref
+     | "result"                          -> result_ref
+     | "(" expr ")"
+     | "(" expr ("," expr)+ ")"          -> tuple
+     | "[" _NL? (expr ("," _NL? expr)* ","? _NL?)? "]" -> list
+
+?literal: INT | FLOAT | QUANTITY | STRING | "true" -> true | "false" -> false
+
+// ---------- lessico ----------
+
+PUB: "pub"
+CRITICAL: "critical"
+NONE: "none"
+PRIMITIVE.2: /(bool|char|i8|i16|i32|i64|u8|u16|u32|u64|f16|bf16|f32|f64|fp8|int4)\b/
+
+TYPE_NAME: /[A-Z][A-Za-z0-9]*/
+NAME: /[a-z_][a-z0-9_]*/
+
+QUANTITY.2: /[0-9][0-9_]*(KB|MB|GB|TB|ms|s)\b/
+FLOAT.1: /[0-9][0-9_]*\.[0-9][0-9_]*/
+INT: /[0-9][0-9_]*/
+STRING: /"([^"\\\n]|\\.)*"/
+
+COMMENT: /--[^\n]*/
+_NL: /(\r?\n[\t ]*(--[^\n]*)?)+/
+
+%ignore /[\t ]+/
+%ignore COMMENT

@@ -1,0 +1,65 @@
+-- Un servizio di rete: processo con un indirizzo IPv6 proprio, permessi espliciti,
+-- segreti e risposte di un modello linguistico trattate come dati non fidati.
+module negozio.assistente
+profile: service
+
+from negozio.prezzi import Cents, parse_price
+from std.net import Request, Response, Address
+from std.llm import Model, ask
+
+pub type Action do
+  case Refund(amount: Cents)
+  case Escalate
+  case Reply(text: Str)
+end type Action
+
+critical fn validate_action(reply: Untrusted[Str]) -> Result[Action, Str]
+  doc: "Accetta solo tre azioni; un rimborso non supera 100 euro."
+  effects: none
+  ensures: result is Ok(Refund(a)) implies a <= Cents(10_000)
+do
+  let text = reply.inspect()
+  match text.word(0) do
+    case "rimborso":
+      let amount = parse_price(text.word(1))?
+      if amount > Cents(10_000) do
+        return Err("rimborso oltre il limite")
+      end if
+      return Ok(Refund(amount))
+    case "escalation":
+      return Ok(Escalate)
+    case _:
+      return Ok(Reply(text))
+  end match
+end fn validate_action
+
+fn handle(edit request: Request, model: Model, key: Secret[Str]) -> Response
+  effects: llm, net("pagamenti.example.com:443")
+do
+  let reply = ask(model, request.body, key: key)
+  match validate_action(reply) do
+    case Ok(Refund(amount)):
+      return Response.ok("Rimborso di {amount} avviato")
+    case Ok(Escalate):
+      return Response.ok("Ti contatta un operatore")
+    case Ok(Reply(text)):
+      return Response.ok(text)
+    case Err(reason):
+      return Response.refused(reason)
+  end match
+end fn handle
+
+process assistente
+  effects: net, llm, fs
+  grants:
+    net.ipv6(1, scope: ula, identity: cga),
+    net.expose(443),
+    fs.read("/etc/assistente/chiave")
+  limits: memory 512MB, cpu 2, connections 1000
+do
+  let key = Secret(fs.read_text("/etc/assistente/chiave")?)
+  let model = Model.open("modello-locale")?
+  for request in net.listen(443) do
+    request.respond(handle(edit request, model, key))
+  end for
+end process assistente

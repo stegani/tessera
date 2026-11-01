@@ -1,0 +1,23 @@
+-- Interoperabilita': una funzione C e una Python dichiarate con effetti e contratto.
+module strumenti.immagini
+
+from std.bytes import Bytes
+
+extern "c" fn crc32(data: Bytes) -> u32
+  effects: none
+  requires: data.len() < 4GB
+end extern
+
+extern "python" fn load_image(path: Str) -> Untrusted[Bytes]
+  effects: fs.read("/dati/immagini")
+end extern
+
+pub const max_size: i64 = 5_000_000
+
+pub fn checksum(path: Str) -> Result[u32, Str]
+  effects: fs.read("/dati/immagini")
+do
+  let raw = load_image(path)
+  let data = raw.validate(fn(b) => b.len() <= max_size)?
+  return Ok(crc32(data))
+end fn checksum
