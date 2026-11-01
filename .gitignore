@@ -16,3 +16,6 @@ Thumbs.db
 
 # Uscite del compilatore
 build/
+
+# Risultati dell'esperimento (si pubblicano solo per scelta)
+experiment/results/

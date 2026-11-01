@@ -76,8 +76,15 @@ def _abs(interprete, a, nodo):
     return interprete.controlla_intero(abs(a), nodo) if isinstance(a, int) else abs(a)
 
 
+def _from_code(interprete, n, nodo):
+    if isinstance(n, bool) or not isinstance(n, int) or not 0 <= n <= 0x10FFFF:
+        raise errore("esecuzione", f"from_code vuole un codice di carattere tra 0 e 1114111, non {V.formatta(n, True)}", nodo)
+    return chr(n)
+
+
 GLOBALI = {
     "print": Nativa("print", _print, effetto="console", arieta=1),
+    "from_code": Nativa("from_code", _from_code, arieta=1),
     "read_text": Nativa("read_text", _read_text, effetto="fs", arieta=1),
     "min": Nativa("min", _min, arieta=2),
     "max": Nativa("max", _max, arieta=2),
@@ -154,6 +161,22 @@ def _unwrap_or(i, v, a, n):
     return a[0]
 
 
+def _intervallo(i, valori, a, n, chi):
+    inizio, fine = a
+    for x in (inizio, fine):
+        if isinstance(x, bool) or not isinstance(x, int):
+            raise errore("tipo", f"{chi} vuole indici interi, non {V.nome_tipo(x)}", n)
+    if not 0 <= inizio <= fine <= len(valori):
+        raise errore("esecuzione", f"{chi}({inizio}, {fine}) fuori dai limiti (lunghezza {len(valori)})", n)
+    return valori[inizio:fine]
+
+
+def _codice(i, s, a, n):
+    if len(s) != 1:
+        raise errore("esecuzione", f"code() vuole un solo carattere, non {len(s)}", n)
+    return ord(s)
+
+
 def _radice(x, n):
     if x < 0:
         raise errore("esecuzione", "radice quadrata di un numero negativo", n)
@@ -181,6 +204,8 @@ METODI = {
         "split": (1, lambda i, s, a, n: s.split(stringa(a[0], n, "split"))),
         "split_once": (1, _split_once),
         "chars": (0, lambda i, s, a, n: list(s)),
+        "slice": (2, lambda i, s, a, n: _intervallo(i, s, a, n, "slice")),
+        "code": (0, _codice),
         "to_int": (0, _to_int_da_str),
         "to_float": (0, _to_float_da_str),
         "to_str": (0, lambda i, s, a, n: s),
@@ -196,6 +221,7 @@ METODI = {
         "filter": (1, lambda i, l, a, n: [x for x in l if i.chiama_valore(a[0], [x], n) is True]),
         "sum": (0, _sum),
         "reversed": (0, lambda i, l, a, n: list(reversed(l))),
+        "slice": (2, lambda i, l, a, n: [V.copia(x) for x in _intervallo(i, l, a, n, "slice")]),
         "sorted": (0, _ordinata),
         "join": (1, _join),
         "to_str": (0, lambda i, l, a, n: V.formatta(l, nodo=n)),

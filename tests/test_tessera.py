@@ -276,3 +276,27 @@ def test_compilatore_e_interprete_coincidono(numeri, funzione):
             assert ottenuto[0] == "errore", argomenti
             continue
         assert ottenuto == atteso, (funzione, argomenti)
+
+
+# ---------- esperimento della fase 1 ----------
+
+def test_esperimento_soluzioni_di_riferimento():
+    """Ogni esercizio deve avere soluzioni di riferimento che superano tutti i test, nei due linguaggi."""
+    from experiment.__main__ import main as esperimento
+    assert esperimento(["check"]) == 0
+
+
+def test_esperimento_distingue_difetti_silenziosi():
+    """Una somma senza controlli: in Python da' un risultato sbagliato, in Tessera ferma il programma."""
+    from experiment import sandbox
+    from experiment.__main__ import carica_compiti
+    task = {t["id"]: t for t in carica_compiti()}["checked_sum"]
+    python = "class Overflow(Exception):\n    pass\n\ndef checked_sum(values):\n    return sum(values)\n"
+    tessera = ("module solution\n\npub type SumError do\n  case Overflow\nend type SumError\n\n"
+               "pub fn checked_sum(values: List[i64]) -> Result[i64, SumError]\n  effects: none\ndo\n"
+               "  var total = 0\n  for v in values do\n    total += v\n  end for\n  return Ok(total)\n"
+               "end fn checked_sum\n")
+    esiti_py = [r["outcome"] for r in sandbox.esegui("python", python, task, task["hidden"])["results"]]
+    esiti_tsr = [r["outcome"] for r in sandbox.esegui("tessera", tessera, task, task["hidden"])["results"]]
+    assert esiti_py.count("wrong") == 2 and "error" not in esiti_py
+    assert esiti_tsr.count("error") == 2 and "wrong" not in esiti_tsr

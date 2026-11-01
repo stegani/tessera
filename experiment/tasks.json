@@ -1,0 +1,410 @@
+[
+  {
+    "id": "parse_int_safe",
+    "kind": "result",
+    "security": true,
+    "description": "Parse a decimal integer from text. The text is valid if it is an optional single leading '-' followed by one or more ASCII digits 0-9, with nothing else (no spaces, no '+', no other characters). Fail with Empty if the text is empty, Invalid if it is not valid, OutOfRange if the value does not fit in a signed 64-bit integer.",
+    "errors": ["Empty", "Invalid", "OutOfRange"],
+    "tessera_signature": "pub fn parse_int_safe(text: Str) -> Result[i64, ParseError]",
+    "tessera_types": "pub type ParseError do\n  case Empty\n  case Invalid\n  case OutOfRange\nend type ParseError",
+    "python_signature": "def parse_int_safe(text: str) -> int",
+    "visible": [
+      {"args": ["42"], "expect": {"ok": 42}},
+      {"args": ["-17"], "expect": {"ok": -17}},
+      {"args": ["abc"], "expect": {"err": "Invalid"}}
+    ],
+    "hidden": [
+      {"args": [""], "expect": {"err": "Empty"}},
+      {"args": ["-"], "expect": {"err": "Invalid"}},
+      {"args": [" 12"], "expect": {"err": "Invalid"}},
+      {"args": ["+5"], "expect": {"err": "Invalid"}},
+      {"args": ["12a"], "expect": {"err": "Invalid"}},
+      {"args": ["--5"], "expect": {"err": "Invalid"}},
+      {"args": ["\u0661\u0662"], "expect": {"err": "Invalid"}},
+      {"args": ["9223372036854775807"], "expect": {"ok": 9223372036854775807}},
+      {"args": ["9223372036854775808"], "expect": {"err": "OutOfRange"}},
+      {"args": ["-9223372036854775808"], "expect": {"ok": -9223372036854775808}}
+    ]
+  },
+  {
+    "id": "safe_divide",
+    "kind": "result",
+    "security": true,
+    "description": "Integer division a / b that truncates toward zero (like C and Rust: -7 / 2 is -3). Fail with DivisionByZero if b is 0, and with Overflow if the exact result does not fit in a signed 64-bit integer.",
+    "errors": ["DivisionByZero", "Overflow"],
+    "tessera_signature": "pub fn safe_divide(a: i64, b: i64) -> Result[i64, MathError]",
+    "tessera_types": "pub type MathError do\n  case DivisionByZero\n  case Overflow\nend type MathError",
+    "python_signature": "def safe_divide(a: int, b: int) -> int",
+    "visible": [
+      {"args": [7, 2], "expect": {"ok": 3}},
+      {"args": [10, 0], "expect": {"err": "DivisionByZero"}}
+    ],
+    "hidden": [
+      {"args": [-7, 2], "expect": {"ok": -3}},
+      {"args": [7, -2], "expect": {"ok": -3}},
+      {"args": [-7, -2], "expect": {"ok": 3}},
+      {"args": [0, 5], "expect": {"ok": 0}},
+      {"args": [-9223372036854775808, -1], "expect": {"err": "Overflow"}},
+      {"args": [-9223372036854775808, 1], "expect": {"ok": -9223372036854775808}}
+    ]
+  },
+  {
+    "id": "average",
+    "kind": "option",
+    "security": false,
+    "description": "Return the arithmetic mean of the values as a floating-point number, or nothing if the list is empty.",
+    "tessera_signature": "pub fn average(values: List[i64]) -> Option[f64]",
+    "python_signature": "def average(values: list[int]) -> float | None",
+    "visible": [
+      {"args": [[1, 2, 3, 4]], "expect": {"some": 2.5}},
+      {"args": [[]], "expect": {"none": true}}
+    ],
+    "hidden": [
+      {"args": [[5]], "expect": {"some": 5.0}},
+      {"args": [[-1, 1]], "expect": {"some": 0.0}},
+      {"args": [[1, 2]], "expect": {"some": 1.5}},
+      {"args": [[-3, -4]], "expect": {"some": -3.5}}
+    ]
+  },
+  {
+    "id": "word_count",
+    "kind": "plain",
+    "security": false,
+    "description": "Count the words in the text. Words are separated by one or more space characters (' '); only the space character is a separator. Leading and trailing spaces do not create words.",
+    "tessera_signature": "pub fn word_count(text: Str) -> i64",
+    "python_signature": "def word_count(text: str) -> int",
+    "visible": [
+      {"args": ["hello world"], "expect": 2},
+      {"args": ["one"], "expect": 1}
+    ],
+    "hidden": [
+      {"args": [""], "expect": 0},
+      {"args": ["   "], "expect": 0},
+      {"args": ["  a  b  "], "expect": 2},
+      {"args": ["a\tb"], "expect": 1},
+      {"args": ["many   spaces here"], "expect": 3}
+    ]
+  },
+  {
+    "id": "is_palindrome",
+    "kind": "plain",
+    "security": false,
+    "description": "Return true if the text reads the same backwards and forwards, ignoring letter case and ignoring space characters (' '). Every other character counts. The empty text is a palindrome.",
+    "tessera_signature": "pub fn is_palindrome(text: Str) -> bool",
+    "python_signature": "def is_palindrome(text: str) -> bool",
+    "visible": [
+      {"args": ["Anna"], "expect": true},
+      {"args": ["hello"], "expect": false}
+    ],
+    "hidden": [
+      {"args": [""], "expect": true},
+      {"args": ["A man a plan a canal Panama"], "expect": true},
+      {"args": ["ab"], "expect": false},
+      {"args": ["Never odd or even"], "expect": true},
+      {"args": ["Taco, cat"], "expect": false}
+    ]
+  },
+  {
+    "id": "fizzbuzz",
+    "kind": "plain",
+    "security": false,
+    "description": "Return the list of strings for the numbers 1 to n: \"FizzBuzz\" for multiples of 15, \"Fizz\" for multiples of 3, \"Buzz\" for multiples of 5, otherwise the number in decimal. n is never negative; for n = 0 return an empty list.",
+    "tessera_signature": "pub fn fizzbuzz(n: i64) -> List[Str]",
+    "python_signature": "def fizzbuzz(n: int) -> list[str]",
+    "visible": [
+      {"args": [5], "expect": ["1", "2", "Fizz", "4", "Buzz"]}
+    ],
+    "hidden": [
+      {"args": [0], "expect": []},
+      {"args": [1], "expect": ["1"]},
+      {"args": [15], "expect": ["1", "2", "Fizz", "4", "Buzz", "Fizz", "7", "8", "Fizz", "Buzz", "11", "Fizz", "13", "14", "FizzBuzz"]}
+    ]
+  },
+  {
+    "id": "max_subarray_sum",
+    "kind": "option",
+    "security": false,
+    "description": "Return the largest sum of a non-empty contiguous run of values, or nothing if the list is empty.",
+    "tessera_signature": "pub fn max_subarray_sum(values: List[i64]) -> Option[i64]",
+    "python_signature": "def max_subarray_sum(values: list[int]) -> int | None",
+    "visible": [
+      {"args": [[-2, 1, -3, 4, -1, 2, 1, -5, 4]], "expect": {"some": 6}},
+      {"args": [[]], "expect": {"none": true}}
+    ],
+    "hidden": [
+      {"args": [[-3, -1, -2]], "expect": {"some": -1}},
+      {"args": [[5]], "expect": {"some": 5}},
+      {"args": [[1, 2, 3]], "expect": {"some": 6}},
+      {"args": [[2, -1, 2]], "expect": {"some": 3}},
+      {"args": [[0, 0]], "expect": {"some": 0}}
+    ]
+  },
+  {
+    "id": "merge_sorted",
+    "kind": "plain",
+    "security": false,
+    "description": "Merge two lists that are each sorted in ascending order into one ascending list containing all elements of both (keep duplicates).",
+    "tessera_signature": "pub fn merge_sorted(a: List[i64], b: List[i64]) -> List[i64]",
+    "python_signature": "def merge_sorted(a: list[int], b: list[int]) -> list[int]",
+    "visible": [
+      {"args": [[1, 3, 5], [2, 4]], "expect": [1, 2, 3, 4, 5]}
+    ],
+    "hidden": [
+      {"args": [[], []], "expect": []},
+      {"args": [[1, 1], [1]], "expect": [1, 1, 1]},
+      {"args": [[], [2, 3]], "expect": [2, 3]},
+      {"args": [[-5, 0], [-10, 10]], "expect": [-10, -5, 0, 10]}
+    ]
+  },
+  {
+    "id": "dedupe",
+    "kind": "plain",
+    "security": false,
+    "description": "Return the values without duplicates, keeping the first occurrence of each value and the original order.",
+    "tessera_signature": "pub fn dedupe(values: List[i64]) -> List[i64]",
+    "python_signature": "def dedupe(values: list[int]) -> list[int]",
+    "visible": [
+      {"args": [[3, 1, 3, 2, 1]], "expect": [3, 1, 2]}
+    ],
+    "hidden": [
+      {"args": [[]], "expect": []},
+      {"args": [[1, 1, 1]], "expect": [1]},
+      {"args": [[-1, 0, -1]], "expect": [-1, 0]},
+      {"args": [[5, 4, 3]], "expect": [5, 4, 3]}
+    ]
+  },
+  {
+    "id": "caesar",
+    "kind": "plain",
+    "security": false,
+    "description": "Shift every ASCII letter by `shift` positions in the alphabet, wrapping around and keeping its case (a-z stay lowercase, A-Z stay uppercase). Every other character, including non-ASCII letters, is unchanged. shift can be negative or larger than 26.",
+    "tessera_signature": "pub fn caesar(text: Str, shift: i64) -> Str",
+    "python_signature": "def caesar(text: str, shift: int) -> str",
+    "visible": [
+      {"args": ["abc", 1], "expect": "bcd"},
+      {"args": ["Hello, World!", 3], "expect": "Khoor, Zruog!"}
+    ],
+    "hidden": [
+      {"args": ["xyz", 3], "expect": "abc"},
+      {"args": ["abc", -1], "expect": "zab"},
+      {"args": ["Zz", 52], "expect": "Zz"},
+      {"args": ["\u00e0\u00e9 1", 5], "expect": "\u00e0\u00e9 1"},
+      {"args": ["abc", 27], "expect": "bcd"},
+      {"args": ["", 4], "expect": ""}
+    ]
+  },
+  {
+    "id": "validate_username",
+    "kind": "result",
+    "security": true,
+    "description": "Validate a username and return it unchanged if valid. Check in this order: fewer than 3 characters fails with TooShort, more than 16 characters fails with TooLong, any character outside lowercase ASCII letters a-z, digits 0-9 and underscore '_' fails with InvalidChar.",
+    "errors": ["TooShort", "TooLong", "InvalidChar"],
+    "tessera_signature": "pub fn validate_username(name: Str) -> Result[Str, UsernameError]",
+    "tessera_types": "pub type UsernameError do\n  case TooShort\n  case TooLong\n  case InvalidChar\nend type UsernameError",
+    "python_signature": "def validate_username(name: str) -> str",
+    "visible": [
+      {"args": ["alice_92"], "expect": {"ok": "alice_92"}},
+      {"args": ["al"], "expect": {"err": "TooShort"}},
+      {"args": ["Alice"], "expect": {"err": "InvalidChar"}}
+    ],
+    "hidden": [
+      {"args": [""], "expect": {"err": "TooShort"}},
+      {"args": ["abcdefghijklmnop"], "expect": {"ok": "abcdefghijklmnop"}},
+      {"args": ["abcdefghijklmnopq"], "expect": {"err": "TooLong"}},
+      {"args": ["\u00e0bc"], "expect": {"err": "InvalidChar"}},
+      {"args": ["a b"], "expect": {"err": "InvalidChar"}},
+      {"args": ["ab-c"], "expect": {"err": "InvalidChar"}},
+      {"args": ["___"], "expect": {"ok": "___"}},
+      {"args": ["abc\n"], "expect": {"err": "InvalidChar"}}
+    ]
+  },
+  {
+    "id": "is_safe_relative_path",
+    "kind": "plain",
+    "security": true,
+    "description": "Decide whether a user-supplied path is a safe relative path inside a directory. It is safe only if: it is not empty; it does not start with '/'; it contains no backslash '\\' and no ':'; and, split on '/', every segment is non-empty and is neither '.' nor '..'.",
+    "tessera_signature": "pub fn is_safe_relative_path(path: Str) -> bool",
+    "python_signature": "def is_safe_relative_path(path: str) -> bool",
+    "visible": [
+      {"args": ["docs/readme.txt"], "expect": true},
+      {"args": ["../secret"], "expect": false}
+    ],
+    "hidden": [
+      {"args": ["/etc/passwd"], "expect": false},
+      {"args": ["a/../../etc"], "expect": false},
+      {"args": ["a\\b"], "expect": false},
+      {"args": ["C:/x"], "expect": false},
+      {"args": ["a//b"], "expect": false},
+      {"args": ["a/"], "expect": false},
+      {"args": [""], "expect": false},
+      {"args": ["./a"], "expect": false},
+      {"args": [".hidden/file"], "expect": true},
+      {"args": ["..."], "expect": true}
+    ]
+  },
+  {
+    "id": "escape_html",
+    "kind": "plain",
+    "security": true,
+    "description": "Escape text for safe insertion into HTML: replace & with &amp;, < with &lt;, > with &gt;, \" with &quot; and ' with &#39;. Every occurrence must be escaped exactly once.",
+    "tessera_signature": "pub fn escape_html(text: Str) -> Str",
+    "python_signature": "def escape_html(text: str) -> str",
+    "visible": [
+      {"args": ["<b>"], "expect": "&lt;b&gt;"},
+      {"args": ["Tom & Jerry"], "expect": "Tom &amp; Jerry"}
+    ],
+    "hidden": [
+      {"args": ["&amp;"], "expect": "&amp;amp;"},
+      {"args": ["\"'"], "expect": "&quot;&#39;"},
+      {"args": [""], "expect": ""},
+      {"args": ["<script>alert('x')</script>"], "expect": "&lt;script&gt;alert(&#39;x&#39;)&lt;/script&gt;"},
+      {"args": ["plain"], "expect": "plain"}
+    ]
+  },
+  {
+    "id": "luhn_valid",
+    "kind": "plain",
+    "security": true,
+    "description": "Check a number with the Luhn checksum. The input may contain ASCII digits 0-9 and space characters; spaces are ignored. Return false if any other character is present or if there are fewer than 2 digits. Otherwise, starting from the rightmost digit, double every second digit (subtract 9 if the result is above 9), sum everything, and return true if the sum is a multiple of 10.",
+    "tessera_signature": "pub fn luhn_valid(number: Str) -> bool",
+    "python_signature": "def luhn_valid(number: str) -> bool",
+    "visible": [
+      {"args": ["79927398713"], "expect": true},
+      {"args": ["79927398710"], "expect": false}
+    ],
+    "hidden": [
+      {"args": [""], "expect": false},
+      {"args": ["0"], "expect": false},
+      {"args": ["00"], "expect": true},
+      {"args": ["7992 7398 713"], "expect": true},
+      {"args": ["79927398713a"], "expect": false},
+      {"args": ["-79927398713"], "expect": false},
+      {"args": ["\uff10\uff10"], "expect": false}
+    ]
+  },
+  {
+    "id": "roman_to_int",
+    "kind": "result",
+    "security": false,
+    "description": "Convert an uppercase Roman numeral in canonical form (the standard shortest form, values 1 to 3999, e.g. IV not IIII, XC not LXL) to its value. Fail with Empty for an empty text and with Invalid for anything else that is not a canonical numeral.",
+    "errors": ["Empty", "Invalid"],
+    "tessera_signature": "pub fn roman_to_int(text: Str) -> Result[i64, RomanError]",
+    "tessera_types": "pub type RomanError do\n  case Empty\n  case Invalid\nend type RomanError",
+    "python_signature": "def roman_to_int(text: str) -> int",
+    "visible": [
+      {"args": ["XIV"], "expect": {"ok": 14}},
+      {"args": ["MCMXCIV"], "expect": {"ok": 1994}},
+      {"args": ["ABC"], "expect": {"err": "Invalid"}}
+    ],
+    "hidden": [
+      {"args": [""], "expect": {"err": "Empty"}},
+      {"args": ["IIII"], "expect": {"err": "Invalid"}},
+      {"args": ["IC"], "expect": {"err": "Invalid"}},
+      {"args": ["iv"], "expect": {"err": "Invalid"}},
+      {"args": ["MMMCMXCIX"], "expect": {"ok": 3999}},
+      {"args": ["MMMM"], "expect": {"err": "Invalid"}},
+      {"args": ["VX"], "expect": {"err": "Invalid"}},
+      {"args": ["I"], "expect": {"ok": 1}}
+    ]
+  },
+  {
+    "id": "binary_search",
+    "kind": "option",
+    "security": false,
+    "description": "The values are sorted in ascending order and may contain duplicates. Return the index of the first occurrence of target, or nothing if it is not present. Use binary search.",
+    "tessera_signature": "pub fn binary_search(values: List[i64], target: i64) -> Option[i64]",
+    "python_signature": "def binary_search(values: list[int], target: int) -> int | None",
+    "visible": [
+      {"args": [[1, 3, 5, 7], 5], "expect": {"some": 2}},
+      {"args": [[1, 3, 5, 7], 4], "expect": {"none": true}}
+    ],
+    "hidden": [
+      {"args": [[], 1], "expect": {"none": true}},
+      {"args": [[2, 2, 2], 2], "expect": {"some": 0}},
+      {"args": [[1, 2, 2, 3], 2], "expect": {"some": 1}},
+      {"args": [[1], 1], "expect": {"some": 0}},
+      {"args": [[1, 3], 9], "expect": {"none": true}},
+      {"args": [[1, 3], -9], "expect": {"none": true}}
+    ]
+  },
+  {
+    "id": "allowed_requests",
+    "kind": "plain",
+    "security": true,
+    "description": "Rate limiter. times are request timestamps in non-decreasing order. A request at time t is allowed if fewer than `limit` previously allowed requests have a timestamp in the window (t - window, t] (greater than t - window, at most t). Rejected requests do not count. Return one boolean per request. window is always positive and limit is never negative.",
+    "tessera_signature": "pub fn allowed_requests(times: List[i64], window: i64, limit: i64) -> List[bool]",
+    "python_signature": "def allowed_requests(times: list[int], window: int, limit: int) -> list[bool]",
+    "visible": [
+      {"args": [[1, 2, 3, 4], 10, 2], "expect": [true, true, false, false]},
+      {"args": [[1, 2, 20, 21], 10, 2], "expect": [true, true, true, true]}
+    ],
+    "hidden": [
+      {"args": [[], 5, 1], "expect": []},
+      {"args": [[1, 1, 1], 10, 0], "expect": [false, false, false]},
+      {"args": [[0, 10, 20], 10, 1], "expect": [true, true, true]},
+      {"args": [[5, 5, 5], 1, 2], "expect": [true, true, false]},
+      {"args": [[1, 2, 11, 12], 10, 2], "expect": [true, true, true, true]}
+    ]
+  },
+  {
+    "id": "checked_factorial",
+    "kind": "result",
+    "security": true,
+    "description": "Return n! (the product 1 * 2 * ... * n, with 0! = 1). Fail with Negative if n is negative and with Overflow if the result does not fit in a signed 64-bit integer.",
+    "errors": ["Negative", "Overflow"],
+    "tessera_signature": "pub fn checked_factorial(n: i64) -> Result[i64, MathError]",
+    "tessera_types": "pub type MathError do\n  case Negative\n  case Overflow\nend type MathError",
+    "python_signature": "def checked_factorial(n: int) -> int",
+    "visible": [
+      {"args": [5], "expect": {"ok": 120}},
+      {"args": [-1], "expect": {"err": "Negative"}}
+    ],
+    "hidden": [
+      {"args": [0], "expect": {"ok": 1}},
+      {"args": [1], "expect": {"ok": 1}},
+      {"args": [20], "expect": {"ok": 2432902008176640000}},
+      {"args": [21], "expect": {"err": "Overflow"}},
+      {"args": [100], "expect": {"err": "Overflow"}}
+    ]
+  },
+  {
+    "id": "rle_encode",
+    "kind": "plain",
+    "security": false,
+    "description": "Run-length encode the text: each maximal run of the same character becomes the run length in decimal followed by the character. The empty text encodes to the empty text.",
+    "tessera_signature": "pub fn rle_encode(text: Str) -> Str",
+    "python_signature": "def rle_encode(text: str) -> str",
+    "visible": [
+      {"args": ["aaabcc"], "expect": "3a1b2c"}
+    ],
+    "hidden": [
+      {"args": [""], "expect": ""},
+      {"args": ["a"], "expect": "1a"},
+      {"args": ["abab"], "expect": "1a1b1a1b"},
+      {"args": ["zzzzzzzzzzzz"], "expect": "12z"},
+      {"args": ["  "], "expect": "2 "}
+    ]
+  },
+  {
+    "id": "checked_sum",
+    "kind": "result",
+    "security": true,
+    "description": "Add the values from left to right. Fail with Overflow as soon as a partial sum (after adding any value) does not fit in a signed 64-bit integer, even if later values would bring it back into range. The sum of an empty list is 0.",
+    "errors": ["Overflow"],
+    "tessera_signature": "pub fn checked_sum(values: List[i64]) -> Result[i64, SumError]",
+    "tessera_types": "pub type SumError do\n  case Overflow\nend type SumError",
+    "python_signature": "def checked_sum(values: list[int]) -> int",
+    "visible": [
+      {"args": [[1, 2, 3]], "expect": {"ok": 6}},
+      {"args": [[9223372036854775807, 1]], "expect": {"err": "Overflow"}}
+    ],
+    "hidden": [
+      {"args": [[]], "expect": {"ok": 0}},
+      {"args": [[-9223372036854775808]], "expect": {"ok": -9223372036854775808}},
+      {"args": [[-9223372036854775808, -1]], "expect": {"err": "Overflow"}},
+      {"args": [[9223372036854775807, -1, 1]], "expect": {"ok": 9223372036854775807}},
+      {"args": [[9223372036854775807, 1, -1]], "expect": {"err": "Overflow"}},
+      {"args": [[5, -5]], "expect": {"ok": 0}}
+    ]
+  }
+]

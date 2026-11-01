@@ -47,7 +47,7 @@ The full design is in the paper (in Italian): [docs/paper.md](docs/paper.md).
 |---|---|---|
 | 0 | Paper and syntax | done |
 | 1 | Interpreter, static checks, first WebAssembly compiler | done (0.1) |
-| 1 | Experiment: Tessera vs Python written by a language model | to do |
+| 1 | Experiment: Tessera vs Python written by a language model | ready to run ([experiment/](experiment/)) |
 | 2 | Core: static types, full WebAssembly compiler, network capabilities | to do |
 | 3 | AI training: tensors, differentiation, data provenance | to do |
 | 4 | Verification and domains: verified compiler, databases, web, kernel | to do |
@@ -72,7 +72,7 @@ python -m tessera run examples/checkout.tsr
 | `python -m tessera test file.tsr` | runs the `example` clauses as tests |
 | `python -m tessera build file.tsr -o build` | produces `.wat` and `.wasm` |
 | `python -m tessera call file.tsr function arg... [--wasm]` | calls a function, interpreted or compiled |
-| `python -m pytest tests` | 49 tests, including differential testing of the interpreter against WebAssembly |
+| `python -m pytest tests` | 51 tests, including differential testing of the interpreter against WebAssembly |
 
 The prototype already enforces: declared effects, contracts, types at function boundaries, `edit` and `take`, integer overflow, division by zero, file permissions granted by the `process`, `Secret` values never printed, `Result` values never ignored, exhaustive `match`, platform requirements. Messages and documentation are currently in Italian; the rules are in [spec/semantics.md](spec/semantics.md).
 
@@ -86,6 +86,7 @@ The prototype already enforces: declared effects, contracts, types at function b
 | [spec/tessera.lark](spec/tessera.lark) | The formal grammar (LALR(1)) |
 | [tessera/](tessera/) | The prototype: parser, interpreter, static checks, WebAssembly compiler, sentinel |
 | [examples/](examples/) | `.tsr` programs. Runnable: `hello`, `checkout`, `prices`, `warehouse`, `permissions`, `numbers`. Illustrative (they use modules not written yet): `server`, `training`, `interop` |
+| [experiment/](experiment/) | Phase 1 experiment: 20 tasks with hidden edge-case tests, run by Claude in Tessera and in Python |
 | [tests/](tests/) | Prototype tests |
 | [tools/check_grammar.py](tools/check_grammar.py) | Checks the grammar against the examples and 14 typical mistakes it must reject |
 
