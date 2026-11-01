@@ -2,6 +2,8 @@
 
 *[English](README.md) · Italiano*
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23855820.svg)](https://doi.org/10.5281/zenodo.23855820)
+
 **Un linguaggio di programmazione scritto dalle IA e blindato contro le IA.**
 Effetti dichiarati, contratti verificati, vulnerabilità che non compilano.
 
@@ -79,7 +81,9 @@ Tessera è un'idea originale di **Stefano Stegani**, che ne ha scritto il proget
 
 Per citare il progetto:
 
-> Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA*, 2026. https://github.com/stegani/tessera
+> Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA*, 2026. DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820)
+
+Il DOI punta sempre all'ultima versione; la versione 0.1.0 ha un DOI proprio, [10.5281/zenodo.23855821](https://doi.org/10.5281/zenodo.23855821), archiviato su Zenodo.
 
 Il file [CITATION.cff](CITATION.cff) contiene gli stessi dati in forma leggibile dalle macchine: GitHub lo usa per il pulsante "Cite this repository".
 

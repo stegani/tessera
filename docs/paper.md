@@ -536,4 +536,4 @@ Pagine ufficiali dei progetti e degli standard citati; i collegamenti non sono s
 
 ## Come citare
 
-Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA*, 2026. https://github.com/stegani/tessera
+Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA*, 2026. DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820) · https://github.com/stegani/tessera
