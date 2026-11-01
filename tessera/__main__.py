@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Riga di comando di Tessera.
 
   python -m tessera esegui   file.tsr              esegue il process o fn main()

@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Dal testo .tsr all'AST: parser LALR(1) generato da spec/tessera.lark."""
 from functools import lru_cache
 from pathlib import Path

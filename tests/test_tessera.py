@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Test del prototipo: grammatica, esempi, semantica dell'interprete, controlli statici, compilatore."""
 import random
 import sys

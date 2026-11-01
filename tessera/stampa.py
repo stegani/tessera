@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Ristampa espressioni e tipi come codice Tessera, per i messaggi d'errore."""
 from . import ast as A
 

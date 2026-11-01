@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Errori di Tessera in forma strutturata: leggibili da una persona e da un modello."""
 import json
 

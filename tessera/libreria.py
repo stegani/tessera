@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Funzioni e metodi di base del prototipo.
 
 Ogni funzione con un effetto lo dichiara: l'interprete lo controlla prima di eseguirla.

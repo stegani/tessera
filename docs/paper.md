@@ -2,6 +2,8 @@
 
 Stefano Stegani · 1 novembre 2026
 
+© 2026 Stefano Stegani. Distribuito con licenza Apache 2.0: si può riusare citando l'autore (vedi il file NOTICE).
+
 ## Abstract
 
 Tessera è un linguaggio di programmazione pensato per essere scritto soprattutto da intelligenze artificiali e per resistere ad attaccanti che sono, a loro volta, intelligenze artificiali. Le IA scrivono già gran parte del codice nuovo, e le stesse capacità permettono di cercare vulnerabilità su scala enorme a costo quasi nullo. I linguaggi attuali sono stati progettati per persone e lasciano al programmatore la responsabilità di evitare intere classi di errori.
@@ -531,3 +533,7 @@ Pagine ufficiali dei progetti e degli standard citati; i collegamenti non sono s
 - [Triton](https://triton-lang.org)
 - [Mojo](https://www.modular.com/mojo)
 - [safetensors](https://github.com/huggingface/safetensors)
+
+## Come citare
+
+Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA*, 2026. https://github.com/stegani/tessera

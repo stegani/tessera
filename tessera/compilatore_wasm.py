@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Compilatore da Tessera a WebAssembly (testo WAT), versione 0.1.
 
 Compila le funzioni pure (effects: none) su i32, i64, f64 e bool: variabili, if, while, for su intervalli,

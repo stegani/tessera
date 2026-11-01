@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Albero sintattico astratto di Tessera.
 
 Ogni nodo ricorda la riga del sorgente, per gli errori.

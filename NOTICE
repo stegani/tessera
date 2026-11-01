@@ -1,0 +1,23 @@
+Tessera
+Copyright 2026 Stefano Stegani
+
+Tessera, il linguaggio di programmazione "scritto dalle IA, blindato contro le IA",
+il suo progetto, la sua grammatica, il prototipo e il paper che lo descrive
+sono un'opera originale di Stefano Stegani (https://github.com/stegani).
+Prima pubblicazione: https://github.com/stegani/tessera
+
+Il progetto e' distribuito con la licenza Apache 2.0 (file LICENSE).
+Chi lo redistribuisce, in tutto o in parte, anche modificato o incluso in un'altra
+opera, deve conservare questo avviso e citare l'autore (Licenza Apache 2.0,
+sezione 4, lettera d).
+La licenza non concede l'uso del nome "Tessera" ne' del nome dell'autore per
+presentare o promuovere opere derivate come proprie (sezione 6).
+
+--
+
+Tessera, the programming language "written by AI, hardened against AI",
+its design, grammar, prototype and paper are an original work by Stefano Stegani.
+Redistributions, in whole or in part, modified or not, must retain this notice
+and credit the author (Apache License 2.0, section 4(d)). The license grants no
+permission to use the name "Tessera" or the author's name to present or promote
+derivative works as one's own (section 6).

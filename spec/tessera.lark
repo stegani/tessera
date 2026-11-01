@@ -1,3 +1,5 @@
+// Copyright 2026 Stefano Stegani
+// SPDX-License-Identifier: Apache-2.0
 // Grammatica di Tessera, bozza 0.2 (01/11/2026).
 // Le parti facoltative tra [ ] lasciano un segnaposto None nell'albero: le posizioni restano fisse.
 // Formato: EBNF di Lark, parser LALR(1). Le decisioni sono spiegate in spec/sintassi.md.

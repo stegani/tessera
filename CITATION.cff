@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "Se usi Tessera, il suo codice o le sue idee, cita l'autore come indicato qui. If you use Tessera, its code or its ideas, please cite it as below."
+title: "Tessera: scritto dalle IA, blindato contro le IA"
+type: software
+authors:
+  - family-names: Stegani
+    given-names: Stefano
+version: 0.1.0
+date-released: 2026-11-01
+license: Apache-2.0
+repository-code: "https://github.com/stegani/tessera"
+abstract: >-
+  Tessera e' un linguaggio di programmazione pensato per essere scritto soprattutto da
+  intelligenze artificiali e per resistere ad attaccanti che sono a loro volta IA:
+  effetti dichiarati, risorse come permessi unici, contratti verificati e dati non
+  fidati distinti nel sistema dei tipi.
+keywords:
+  - programming language
+  - AI safety
+  - security by construction
+  - formal verification
+  - WebAssembly

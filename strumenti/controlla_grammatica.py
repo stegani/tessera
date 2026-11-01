@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Controlla la grammatica di Tessera.
 
 1. La grammatica deve essere LALR(1) senza conflitti (modalita' rigorosa di Lark).

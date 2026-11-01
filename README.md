@@ -71,6 +71,16 @@ Cosa controlla già il prototipo: effetti dichiarati, contratti, tipi ai confini
 | [tests/](tests/) | Test del prototipo |
 | [strumenti/controlla_grammatica.py](strumenti/controlla_grammatica.py) | Verifica la grammatica sugli esempi e su 14 errori tipici che deve rifiutare |
 
+## Autore e citazione
+
+Tessera è un'idea originale di **Stefano Stegani**, che ne ha scritto il progetto, la grammatica e il paper. Il codice e i testi si possono riusare, anche in progetti commerciali, alle condizioni della licenza: **chi redistribuisce Tessera o un'opera derivata deve conservare il file [NOTICE](NOTICE), che attribuisce l'opera all'autore**, e non può presentarla come propria.
+
+Per citare il progetto:
+
+> Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA*, 2026. https://github.com/stegani/tessera
+
+Il file [CITATION.cff](CITATION.cff) contiene gli stessi dati in forma leggibile dalle macchine: GitHub lo usa per il pulsante "Cite this repository".
+
 ## Licenza
 
-[Apache 2.0](LICENSE).
+[Apache 2.0](LICENSE), con l'avviso di attribuzione in [NOTICE](NOTICE).

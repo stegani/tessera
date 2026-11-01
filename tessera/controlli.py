@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Controlli statici, prima dell'esecuzione: restituiscono tutti gli errori trovati, non solo il primo.
 
 - effetti: ogni chiamata diretta usa solo effetti dichiarati dal chiamante;

@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Interprete ad albero di Tessera (prototipo, fase 1).
 
 Controlla durante l'esecuzione cio' che il compilatore definitivo dovra' garantire prima:

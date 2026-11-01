@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Valori a runtime dell'interprete, uguaglianza strutturale e stampa."""
 from dataclasses import dataclass, field
 

@@ -1,3 +1,5 @@
+# Copyright 2026 Stefano Stegani
+# SPDX-License-Identifier: Apache-2.0
 """Sentinella hardware, versione minima: controlla la clausola platform di un process prima dell'avvio.
 
 Regola: se un requisito non si puo' verificare su questa macchina, il process non parte.
