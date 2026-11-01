@@ -1,0 +1,8 @@
+-- Il primo programma: stampare e' un effetto, e il process lo dichiara.
+module ciao
+
+process main
+  effects: console
+do
+  print("Ciao, Tessera!")
+end process main

@@ -1,36 +1,58 @@
 -- Funzioni pure, errori come valori, contratti ed esempi.
 module negozio.prezzi
 
-from negozio.testo import split_once, parse_digits
-
 pub type Cents = i64
 
 pub type ParseError do
   case Empty
   case NotANumber
-  case TooManyDecimals(found: i32)
+  case TooManyDecimals(found: i64)
 end type ParseError
+
+fn parse_digits(text: Str) -> Result[i64, ParseError]
+  effects: none
+  example: parse_digits("042") == Ok(42)
+  example: parse_digits("4a") == Err(ParseError.NotANumber)
+do
+  if text.is_empty() do
+    return Err(ParseError.Empty)
+  end if
+  if not text.is_digits() do
+    return Err(ParseError.NotANumber)
+  end if
+  return Ok(text.to_int().unwrap_or(0))
+end fn parse_digits
 
 pub fn parse_price(text: Str) -> Result[Cents, ParseError]
   doc: "Converte \"12.50\" in 1250 centesimi."
   effects: none
   requires: text.len() > 0
-  ensures: result is Ok(c) implies c >= 0
+  ensures: result is Ok(c) implies c >= Cents(0)
   example: parse_price("12.50") == Ok(Cents(1250))
+  example: parse_price("7") == Ok(Cents(700))
+  example: parse_price("0.5") == Ok(Cents(50))
   example: parse_price("abc") == Err(ParseError.NotANumber)
+  example: parse_price("1.999") == Err(ParseError.TooManyDecimals(found: 3))
 do
-  let (units, decimals) = split_once(text, ".")
+  let (units, decimals) = text.split_once(".")
   let whole = parse_digits(units)?
   if decimals.len() > 2 do
     return Err(ParseError.TooManyDecimals(found: decimals.len()))
   end if
-  let fraction = parse_digits(decimals)?
+  var fraction = 0
+  if decimals.len() > 0 do
+    fraction = parse_digits(decimals)?
+    if decimals.len() == 1 do
+      fraction *= 10
+    end if
+  end if
   return Ok(Cents(whole * 100 + fraction))
 end fn parse_price
 
 pub fn total(prices: List[Cents]) -> Cents
   effects: none
   ensures: result >= Cents(0)
+  example: total([Cents(150), Cents(250)]) == Cents(400)
 do
   var sum = Cents(0)
   for price in prices do
@@ -46,3 +68,18 @@ pub fn discount(price: Cents, percent: i32) -> Cents
 do
   return price - price * percent / 100
 end fn discount
+
+pub fn format_euro(amount: Cents) -> Str
+  effects: none
+  requires: amount >= Cents(0)
+  example: format_euro(Cents(1250)) == "12.50 EUR"
+  example: format_euro(Cents(7)) == "0.07 EUR"
+do
+  let Cents(c) = amount
+  let units = c / 100
+  let rest = c % 100
+  if rest < 10 do
+    return "{units}.0{rest} EUR"
+  end if
+  return "{units}.{rest} EUR"
+end fn format_euro

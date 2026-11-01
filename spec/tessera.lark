@@ -1,4 +1,5 @@
-// Grammatica di Tessera, bozza 0.1 (01/11/2026).
+// Grammatica di Tessera, bozza 0.2 (01/11/2026).
+// Le parti facoltative tra [ ] lasciano un segnaposto None nell'albero: le posizioni restano fisse.
 // Formato: EBNF di Lark, parser LALR(1). Le decisioni sono spiegate in spec/sintassi.md.
 //
 // Regole che la grammatica impone da sola:
@@ -10,9 +11,13 @@
 
 start: _NL? module_decl (item)*
 
+// Punto d'ingresso per le espressioni dentro le stringhe: "Totale: {x + 1}".
+expr_only: expr
+
 // ---------- modulo e import ----------
 
-module_decl: "module" path _NL ("profile" ":" NAME _NL)?
+module_decl: "module" path _NL [profile_clause]
+profile_clause: "profile" ":" NAME _NL
 path: NAME ("." NAME)*
 
 ?item: import_decl
@@ -27,11 +32,11 @@ import_decl: "from" path "import" name_list _NL
 name_list: import_name ("," import_name)*
 ?import_name: NAME | TYPE_NAME
 
-const_decl: PUB? "const" NAME ":" type "=" expr _NL
+const_decl: [PUB] "const" NAME ":" type "=" expr _NL
 
 // ---------- funzioni ----------
 
-fn_decl: PUB? CRITICAL? "fn" NAME generic_params? "(" params? ")" return_type? _NL fn_clauses "do" block "end" "fn" NAME _NL
+fn_decl: [PUB] [CRITICAL] "fn" NAME [generic_params] "(" [params] ")" [return_type] _NL fn_clauses "do" block "end" "fn" NAME _NL
 return_type: "->" type
 
 generic_params: "[" generic_param ("," generic_param)* "]"
@@ -39,7 +44,7 @@ generic_param: TYPE_NAME (":" TYPE_NAME)?   // T oppure T: Interfaccia
              | NAME                          // dimensione di tensore: batch, seq
 
 params: _NL? param ("," _NL? param)* ","? _NL?
-param: MODE? NAME ":" type shard?
+param: [MODE] NAME ":" type [shard]
 MODE.2: "edit" | "take"
 shard: "@" NAME
 
@@ -48,7 +53,7 @@ fn_clauses: doc_clause? effects_clause requires_clause* ensures_clause* example_
 
 doc_clause: "doc" ":" STRING _NL
 effects_clause: "effects" ":" (NONE | effect ("," effect)*) _NL
-effect: NAME ("." NAME)* call_args?
+effect: NAME ("." NAME)* [call_args]
 requires_clause: "requires" ":" expr _NL
 ensures_clause: "ensures" ":" expr _NL
 example_clause: "example" ":" expr _NL
@@ -57,20 +62,21 @@ quantity: NAME (QUANTITY | INT) ("per" NAME)?
 
 // ---------- tipi ----------
 
-?type: named_type | fn_type
-named_type: (TYPE_NAME | PRIMITIVE) type_args?
+?type: named_type | fn_type | tuple_type
+tuple_type: "(" type ("," type)+ ")"
+named_type: (TYPE_NAME | PRIMITIVE) [type_args]
 type_args: "[" type_arg ("," type_arg)* "]"
 ?type_arg: type | INT | NAME
 fn_type: "fn" "(" (type ("," type)*)? ")" "->" type
 
-type_alias: PUB? "type" TYPE_NAME generic_params? "=" type _NL
+type_alias: [PUB] "type" TYPE_NAME [generic_params] "=" type _NL
 
 // Senza invarianti "do" chiude la riga d'intestazione; con invarianti va su una riga propria.
-type_decl: PUB? "type" TYPE_NAME generic_params? (_NL invariant_clause+)? "do" _NL type_member* "end" "type" TYPE_NAME _NL
+type_decl: [PUB] "type" TYPE_NAME [generic_params] (_NL invariant_clause+)? "do" _NL type_member* "end" "type" TYPE_NAME _NL
 invariant_clause: "invariant" ":" expr _NL
 ?type_member: field_decl | variant_decl
 field_decl: NAME ":" type _NL
-variant_decl: "case" TYPE_NAME ("(" fields ")")? _NL
+variant_decl: "case" TYPE_NAME ["(" fields ")"] _NL
 fields: field ("," field)*
 field: NAME ":" type
 
@@ -78,14 +84,14 @@ field: NAME ":" type
 
 process_decl: "process" NAME _NL effects_clause grants_clause? limits_clause? platform_clause? "do" block "end" "process" NAME _NL
 grants_clause: "grants" ":" _NL? grant ("," _NL? grant)* _NL
-grant: NAME ("." NAME)* call_args?
+grant: NAME ("." NAME)* [call_args]
 limits_clause: "limits" ":" quantity ("," quantity)* _NL
 // Requisiti della macchina, controllati dalla sentinella prima dell'avvio.
 platform_clause: "platform" ":" NAME ("," NAME)* _NL
 
 // ---------- funzioni esterne (C, Python, JavaScript) ----------
 
-extern_decl: "extern" STRING "fn" NAME "(" params? ")" return_type? _NL effects_clause requires_clause* ensures_clause* "end" "extern" _NL
+extern_decl: "extern" STRING "fn" NAME "(" [params] ")" [return_type] _NL effects_clause requires_clause* ensures_clause* "end" "extern" _NL
 
 // ---------- istruzioni ----------
 
@@ -103,16 +109,16 @@ block: _NL statement*
           | continue_stmt
           | simple_stmt
 
-let_stmt: "let" pattern (":" type)? "=" expr _NL
-var_stmt: "var" NAME (":" type)? "=" expr _NL
-return_stmt: "return" expr? _NL
+let_stmt: "let" pattern [":" type] "=" expr _NL
+var_stmt: "var" NAME [":" type] "=" expr _NL
+return_stmt: "return" [expr] _NL
 break_stmt: "break" _NL
 continue_stmt: "continue" _NL
 // Assegnazione o chiamata: chi riceve l'assegnazione si controlla dopo il parsing.
-simple_stmt: expr (ASSIGN_OP expr)? _NL
+simple_stmt: expr [ASSIGN_OP expr] _NL
 ASSIGN_OP: "=" | "+=" | "-=" | "*=" | "/="
 
-if_stmt: "if" expr "do" block elif_part* else_part? "end" "if" _NL
+if_stmt: "if" expr "do" block elif_part* [else_part] "end" "if" _NL
 elif_part: "else" "if" expr "do" block
 else_part: "else" block
 
@@ -120,7 +126,7 @@ for_stmt: "for" pattern "in" expr "do" block "end" "for" _NL
 while_stmt: "while" expr "do" block "end" "while" _NL
 
 match_stmt: "match" expr "do" _NL case_arm+ "end" "match" _NL
-case_arm: "case" pattern ("if" expr)? ":" block
+case_arm: "case" pattern ["if" expr] ":" block
 
 unsafe_stmt: "unsafe" "do" block "end" "unsafe" _NL
 
@@ -138,7 +144,7 @@ unsafe_stmt: "unsafe" "do" block "end" "unsafe" _NL
      | lambda
 
 lambda: "fn" "(" (lambda_param ("," lambda_param)*)? ")" "=>" expr
-lambda_param: NAME (":" type)?
+lambda_param: NAME [":" type]
 
 ?implies_expr: logic_expr ("implies" logic_expr)?
 
@@ -174,7 +180,7 @@ MUL_OP: "*" | "/" | "%" | "@"
         | postfix "?"                    -> try_op
 
 call_args: "(" _NL? (arg ("," _NL? arg)* ","? _NL?)? ")"
-arg: (NAME ":")? MODE? expr
+arg: [NAME ":"] [MODE] expr
 
 ?atom: literal
      | NAME                              -> var
@@ -184,7 +190,7 @@ arg: (NAME ":")? MODE? expr
      | "(" expr ("," expr)+ ")"          -> tuple
      | "[" _NL? (expr ("," _NL? expr)* ","? _NL?)? "]" -> list
 
-?literal: INT | FLOAT | QUANTITY | STRING | "true" -> true | "false" -> false
+literal: INT | FLOAT | QUANTITY | STRING | "true" -> true | "false" -> false
 
 // ---------- lessico ----------
 

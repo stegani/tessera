@@ -23,15 +23,40 @@ Chi usa `parse_price` sa dalla firma cosa riceve, cosa può fallire, quali condi
 
 ## Stato
 
-**Fase di progetto.** Esistono il paper, la grammatica formale e programmi di esempio; non esiste ancora un interprete né un compilatore.
+**Prototipo 0.1.** Esistono un interprete completo per il nucleo del linguaggio, i controlli statici e un compilatore verso WebAssembly per le funzioni numeriche pure. È scritto in Python per arrivare in fretta all'esperimento della fase 1; il compilatore definitivo verrà riscritto quando il linguaggio sarà stabile.
 
 | Fase | Cosa | Stato |
 |---|---|---|
 | 0 | Paper e sintassi | fatto |
-| 1 | Esperimento: interprete minimo, Tessera contro Python con un modello linguistico | da fare |
-| 2 | Nucleo: compilatore verso WebAssembly, effetti, capability | da fare |
+| 1 | Interprete, controlli statici, primo compilatore WebAssembly | fatto (0.1) |
+| 1 | Esperimento: Tessera contro Python con un modello linguistico | da fare |
+| 2 | Nucleo: tipi statici, compilatore WebAssembly completo, capability di rete | da fare |
 | 3 | Addestramento di IA: tensori, derivazione, provenienza dei dati | da fare |
 | 4 | Verifica e domini: compilatore verificato, database, web, kernel | da fare |
+
+## Provare
+
+```bash
+python -m venv .venv
+.venv/Scripts/pip install -r requirements.txt
+```
+
+Su Linux e macOS il percorso è `.venv/bin/pip`. Poi, con l'ambiente attivo:
+
+```bash
+python -m tessera esegui esempi/cassa.tsr
+```
+
+| Comando | Cosa fa |
+|---|---|
+| `python -m tessera esegui file.tsr` | controlla il programma ed esegue il `process` o `fn main()` |
+| `python -m tessera verifica file.tsr` | controlli statici senza eseguire (`--json` per errori leggibili da un modello) |
+| `python -m tessera prova file.tsr` | esegue le clausole `example` come test |
+| `python -m tessera compila file.tsr -o build` | produce `.wat` e `.wasm` |
+| `python -m tessera chiama file.tsr funzione arg... [--wasm]` | chiama una funzione, interpretata o compilata |
+| `python -m pytest tests` | 49 test, compresa la prova differenziale interprete contro WebAssembly |
+
+Cosa controlla già il prototipo: effetti dichiarati, contratti, tipi ai confini delle funzioni, `edit` e `take`, overflow, divisione per zero, permessi sui file del `process`, `Secret` mai stampati, `Result` mai ignorati, `match` esaustivi, requisiti di piattaforma. Le regole sono in [spec/semantica.md](spec/semantica.md).
 
 ## Contenuto
 
@@ -39,16 +64,12 @@ Chi usa `parse_price` sa dalla firma cosa riceve, cosa può fallire, quali condi
 |---|---|
 | [docs/paper.md](docs/paper.md) | Il paper: motivazioni, architettura, modello di sicurezza, valutazione |
 | [spec/sintassi.md](spec/sintassi.md) | Le decisioni di sintassi, con motivazioni e misure in token |
+| [spec/semantica.md](spec/semantica.md) | Le regole di esecuzione decise con il prototipo |
 | [spec/tessera.lark](spec/tessera.lark) | La grammatica formale (LALR(1)) |
-| [esempi/](esempi/) | Programmi `.tsr` di esempio: prezzi, un servizio di rete, addestramento, interoperabilità |
+| [tessera/](tessera/) | Il prototipo: analizzatore, interprete, controlli statici, compilatore WebAssembly, sentinella |
+| [esempi/](esempi/) | Programmi `.tsr`. Eseguibili: `ciao`, `cassa`, `prezzi`, `magazzino`, `permessi`, `numeri`. Illustrativi (usano moduli non ancora scritti): `server`, `addestramento`, `interop` |
+| [tests/](tests/) | Test del prototipo |
 | [strumenti/controlla_grammatica.py](strumenti/controlla_grammatica.py) | Verifica la grammatica sugli esempi e su 14 errori tipici che deve rifiutare |
-
-## Provare la grammatica
-
-```bash
-pip install -r requirements.txt
-python strumenti/controlla_grammatica.py
-```
 
 ## Licenza
 

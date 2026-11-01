@@ -1,0 +1,137 @@
+-- Funzioni numeriche pure: le esegue l'interprete e le compila il compilatore WebAssembly.
+module numeri
+
+pub fn gcd(a: i64, b: i64) -> i64
+  effects: none
+  requires: a >= 0 and b >= 0
+  ensures: result >= 0
+  example: gcd(48, 18) == 6
+  example: gcd(7, 0) == 7
+do
+  var x = a
+  var y = b
+  while y != 0 do
+    let r = x % y
+    x = y
+    y = r
+  end while
+  return x
+end fn gcd
+
+pub fn factorial(n: i64) -> i64
+  effects: none
+  requires: n >= 0
+  example: factorial(5) == 120
+  example: factorial(20) == 2432902008176640000
+do
+  var acc = 1
+  for i in 1..n + 1 do
+    acc *= i
+  end for
+  return acc
+end fn factorial
+
+pub fn fibonacci(n: i64) -> i64
+  effects: none
+  requires: n >= 0
+  example: fibonacci(10) == 55
+  example: fibonacci(90) == 2880067194370816120
+do
+  var a = 0
+  var b = 1
+  var i = 0
+  while i < n do
+    let next = a + b
+    a = b
+    b = next
+    i += 1
+  end while
+  return a
+end fn fibonacci
+
+pub fn is_prime(n: i64) -> bool
+  effects: none
+  example: is_prime(97)
+  example: not is_prime(91)
+do
+  if n < 2 do
+    return false
+  end if
+  var d = 2
+  while d * d <= n do
+    if n % d == 0 do
+      return false
+    end if
+    d += 1
+  end while
+  return true
+end fn is_prime
+
+pub fn collatz_steps(start: i64) -> i64
+  effects: none
+  requires: start > 0
+  ensures: result >= 0
+  example: collatz_steps(27) == 111
+do
+  var n = start
+  var steps = 0
+  while n != 1 do
+    if n % 2 == 0 do
+      n = n / 2
+    else
+      n = 3 * n + 1
+    end if
+    steps += 1
+  end while
+  return steps
+end fn collatz_steps
+
+pub fn power(base: i64, exp: i64) -> i64
+  effects: none
+  requires: exp >= 0
+  example: power(2, 10) == 1024
+  example: power(-3, 3) == -27
+do
+  var acc = 1
+  for i in 0..exp do
+    acc *= base
+  end for
+  return acc
+end fn power
+
+pub fn clamp(x: i64, low: i64, high: i64) -> i64
+  effects: none
+  requires: low <= high
+  ensures: result >= low and result <= high
+  example: clamp(15, 0, 10) == 10
+  example: clamp(-3, 0, 10) == 0
+do
+  if x < low do
+    return low
+  else if x > high do
+    return high
+  end if
+  return x
+end fn clamp
+
+pub fn add_small(a: i32, b: i32) -> i32
+  effects: none
+  example: add_small(2, 3) == 5
+do
+  return a + b
+end fn add_small
+
+pub fn mean(a: f64, b: f64) -> f64
+  effects: none
+  example: mean(1.0, 2.0) == 1.5
+do
+  return (a + b) / 2.0
+end fn mean
+
+pub fn hypotenuse_squared(a: f64, b: f64) -> f64
+  effects: none
+  ensures: result >= 0.0
+  example: hypotenuse_squared(3.0, 4.0) == 25.0
+do
+  return a * a + b * b
+end fn hypotenuse_squared

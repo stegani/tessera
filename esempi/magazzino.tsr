@@ -1,0 +1,55 @@
+-- Strutture, tipi somma, match con guardie, edit e take.
+module magazzino
+
+pub type Item do
+  name: Str
+  quantity: i64
+end type Item
+
+pub type Movement do
+  case Load(quantity: i64)
+  case Unload(quantity: i64)
+  case Inventory
+end type Movement
+
+fn apply(edit item: Item, movement: Movement) -> Result[i64, Str]
+  effects: none
+  ensures: result is Ok(q) implies q >= 0
+do
+  match movement do
+    case Load(q):
+      item.quantity += q
+    case Unload(q) if q > item.quantity:
+      return Err("scorte insufficienti di {item.name}: {item.quantity} disponibili, {q} richiesti")
+    case Unload(q):
+      item.quantity -= q
+    case Inventory:
+      return Ok(item.quantity)
+  end match
+  return Ok(item.quantity)
+end fn apply
+
+fn archive(take items: List[Item]) -> Str
+  effects: none
+  example: archive([Item(name: "a", quantity: 1), Item(name: "b", quantity: 2)]) == "a, b"
+do
+  let names = items.map(fn(i) => i.name)
+  return names.join(", ")
+end fn archive
+
+fn main()
+  effects: console
+do
+  var screws = Item(name: "viti", quantity: 100)
+  let movements = [Load(quantity: 50), Unload(quantity: 30), Unload(quantity: 500), Inventory]
+  for m in movements do
+    match apply(edit screws, m) do
+      case Ok(q):
+        print("{m}: ora {q}")
+      case Err(problem):
+        print("rifiutato: {problem}")
+    end match
+  end for
+  var all = [screws, Item(name: "bulloni", quantity: 12)]
+  print("Archiviati: {archive(take all)}")
+end fn main

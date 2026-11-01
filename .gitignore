@@ -13,3 +13,6 @@ Thumbs.db
 # Segreti: mai nella repo
 .env
 .env.*
+
+# Uscite del compilatore
+build/

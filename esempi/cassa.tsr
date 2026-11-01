@@ -1,0 +1,21 @@
+-- Un programma che importa un altro modulo e stampa: serve l'effetto console.
+module negozio.cassa
+
+from negozio.prezzi import Cents, parse_price, total, discount, format_euro
+
+fn main()
+  effects: console
+do
+  var prices: List[Cents] = []
+  for text in ["12.50", "3", "abc", "0.99", "1.999"] do
+    match parse_price(text) do
+      case Ok(price):
+        prices.push(price)
+      case Err(problem):
+        print("Prezzo non valido: \"{text}\" ({problem})")
+    end match
+  end for
+  let sum = total(prices)
+  print("Totale: {format_euro(sum)}")
+  print("Con lo sconto del 10%: {format_euro(discount(sum, 10))}")
+end fn main

@@ -1,0 +1,15 @@
+-- Permessi sui file: il process legge solo dove dichiara in grants.
+-- I percorsi relativi partono dalla cartella di questo file.
+module permessi
+
+process main
+  effects: console, fs
+  grants: fs.read("dati")
+do
+  match read_text("dati/benvenuto.txt") do
+    case Ok(text):
+      print("Letto: {text.trim()}")
+    case Err(problem):
+      print("Errore: {problem}")
+  end match
+end process main

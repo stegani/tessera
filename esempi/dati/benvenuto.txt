@@ -1,0 +1,1 @@
+Questo file si puo' leggere perche' il process ha il permesso fs.read("dati").
