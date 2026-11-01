@@ -3,10 +3,10 @@
 """Controlla la grammatica di Tessera.
 
 1. La grammatica deve essere LALR(1) senza conflitti (modalita' rigorosa di Lark).
-2. Tutti i file esempi/*.tsr devono essere accettati.
+2. Tutti i file examples/*.tsr devono essere accettati.
 3. Ogni caso di CASI_RIFIUTATI deve essere rifiutato: dal parser o dai controlli dopo il parsing.
 
-Uso:  pip install "lark[interegular]"   poi   python strumenti/controlla_grammatica.py
+Uso:  pip install "lark[interegular]"   poi   python tools/check_grammar.py
 """
 import json
 import sys
@@ -17,7 +17,7 @@ from lark.exceptions import UnexpectedInput
 
 RADICE = Path(__file__).resolve().parent.parent
 GRAMMATICA = RADICE / "spec" / "tessera.lark"
-ESEMPI = RADICE / "esempi"
+ESEMPI = RADICE / "examples"
 
 
 def crea_parser():

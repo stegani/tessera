@@ -6,8 +6,8 @@ Ogni funzione con un effetto lo dichiara: l'interprete lo controlla prima di ese
 """
 import math
 
-from . import valori as V
-from .errori import ErroreTessera
+from . import values as V
+from .errors import ErroreTessera
 
 
 def errore(tipo, messaggio, nodo, suggerimento=None):

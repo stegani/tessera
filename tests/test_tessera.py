@@ -9,16 +9,16 @@ import pytest
 
 RADICE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RADICE))
-sys.path.insert(0, str(RADICE / "strumenti"))
+sys.path.insert(0, str(RADICE / "tools"))
 
-from tessera.compilatore_wasm import Esecutore, compila_modulo  # noqa: E402
-from tessera.controlli import controlla_programma  # noqa: E402
-from tessera.errori import ErroreTessera  # noqa: E402
-from tessera.interprete import Interprete, Programma  # noqa: E402
-from tessera.sintassi import analizza_file  # noqa: E402
+from tessera.wasm_compiler import Esecutore, compila_modulo  # noqa: E402
+from tessera.checks import controlla_programma  # noqa: E402
+from tessera.errors import ErroreTessera  # noqa: E402
+from tessera.interpreter import Interprete, Programma  # noqa: E402
+from tessera.parser import analizza_file  # noqa: E402
 
-ESEMPI = RADICE / "esempi"
-ESEGUIBILI = ["ciao", "cassa", "magazzino", "permessi", "prezzi", "numeri"]
+ESEMPI = RADICE / "examples"
+ESEGUIBILI = ["hello", "checkout", "warehouse", "permissions", "prices", "numbers"]
 
 
 def programma(tmp_path, sorgente, nome="prova.tsr"):
@@ -53,8 +53,8 @@ def fallisce(tmp_path, sorgente, tipo, frammento=""):
 # ---------- grammatica ed esempi ----------
 
 def test_grammatica():
-    import controlla_grammatica
-    assert controlla_grammatica.main() == 0
+    import check_grammar
+    assert check_grammar.main() == 0
 
 
 @pytest.mark.parametrize("nome", ESEGUIBILI)
@@ -62,7 +62,7 @@ def test_esempi_senza_errori_statici(nome):
     assert controlla_programma(Programma(ESEMPI / f"{nome}.tsr")) == []
 
 
-@pytest.mark.parametrize("nome", ["prezzi", "numeri", "magazzino"])
+@pytest.mark.parametrize("nome", ["prices", "numbers", "warehouse"])
 def test_clausole_example(nome):
     esiti = Interprete(Programma(ESEMPI / f"{nome}.tsr"), eco=False).esegui_esempi()
     assert esiti and all(e[2] for e in esiti), [e for e in esiti if not e[2]]
@@ -75,21 +75,21 @@ def uscite(nome):
 
 
 def test_ciao():
-    assert uscite("ciao") == ["Ciao, Tessera!"]
+    assert uscite("hello") == ["Ciao, Tessera!"]
 
 
 def test_cassa():
-    assert uscite("cassa")[-2:] == ["Totale: 16.49 EUR", "Con lo sconto del 10%: 14.85 EUR"]
+    assert uscite("checkout")[-2:] == ["Totale: 16.49 EUR", "Con lo sconto del 10%: 14.85 EUR"]
 
 
 def test_magazzino():
-    righe = uscite("magazzino")
+    righe = uscite("warehouse")
     assert "rifiutato: scorte insufficienti di viti: 120 disponibili, 500 richiesti" in righe
     assert righe[-1] == "Archiviati: viti, bulloni"
 
 
 def test_permessi():
-    assert uscite("permessi")[0].startswith("Letto: Questo file si puo' leggere")
+    assert uscite("permissions")[0].startswith("Letto: Questo file si puo' leggere")
 
 
 # ---------- semantica dell'interprete ----------
@@ -225,8 +225,8 @@ def test_unsafe_fuori_da_kernel(tmp_path):
 
 @pytest.fixture(scope="module")
 def numeri():
-    risultato = compila_modulo(analizza_file(ESEMPI / "numeri.tsr"))
-    return risultato, Esecutore(risultato), Interprete(Programma(ESEMPI / "numeri.tsr"), eco=False)
+    risultato = compila_modulo(analizza_file(ESEMPI / "numbers.tsr"))
+    return risultato, Esecutore(risultato), Interprete(Programma(ESEMPI / "numbers.tsr"), eco=False)
 
 
 def test_compila_tutto_numeri(numeri):
@@ -236,7 +236,7 @@ def test_compila_tutto_numeri(numeri):
 
 
 def test_salta_con_motivo():
-    risultato = compila_modulo(analizza_file(ESEMPI / "prezzi.tsr"))
+    risultato = compila_modulo(analizza_file(ESEMPI / "prices.tsr"))
     assert risultato.compilate == []
     assert "Str" in risultato.saltate["parse_price"]
 

@@ -12,11 +12,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import ast as A
-from . import valori as V
-from .errori import ErroreTessera
-from .libreria import GLOBALI, METODI, METODI_MUTANTI, specie_metodo
-from .sintassi import analizza_file
-from .stampa import mostra, mostra_schema, mostra_tipo
+from . import values as V
+from .errors import ErroreTessera
+from .library import GLOBALI, METODI, METODI_MUTANTI, specie_metodo
+from .parser import analizza_file
+from .printer import mostra, mostra_schema, mostra_tipo
 
 
 def errore(tipo, messaggio, nodo=None, suggerimento=None):
@@ -1078,7 +1078,7 @@ class Interprete:
                             suggerimento="aggiungi un process o una fn main()")
 
     def esegui_processo(self, proc):
-        from .sentinella import controlla_piattaforma
+        from .sentinel import controlla_piattaforma
         controlla_piattaforma(proc)
         m = self.programma.principale
         permessi = []

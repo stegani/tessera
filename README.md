@@ -55,7 +55,7 @@ python -m venv .venv
 On Linux and macOS the path is `.venv/bin/pip`. Then, with the environment active:
 
 ```bash
-python -m tessera run esempi/cassa.tsr
+python -m tessera run examples/checkout.tsr
 ```
 
 | Command | What it does |
@@ -67,20 +67,20 @@ python -m tessera run esempi/cassa.tsr
 | `python -m tessera call file.tsr function arg... [--wasm]` | calls a function, interpreted or compiled |
 | `python -m pytest tests` | 49 tests, including differential testing of the interpreter against WebAssembly |
 
-The prototype already enforces: declared effects, contracts, types at function boundaries, `edit` and `take`, integer overflow, division by zero, file permissions granted by the `process`, `Secret` values never printed, `Result` values never ignored, exhaustive `match`, platform requirements. Messages and documentation are currently in Italian; the rules are in [spec/semantica.md](spec/semantica.md).
+The prototype already enforces: declared effects, contracts, types at function boundaries, `edit` and `take`, integer overflow, division by zero, file permissions granted by the `process`, `Secret` values never printed, `Result` values never ignored, exhaustive `match`, platform requirements. Messages and documentation are currently in Italian; the rules are in [spec/semantics.md](spec/semantics.md).
 
 ## Repository layout
 
 | Path | Contents |
 |---|---|
 | [docs/paper.md](docs/paper.md) | The paper: motivation, architecture, security model, evaluation |
-| [spec/sintassi.md](spec/sintassi.md) | Syntax decisions, with rationale and token measurements |
-| [spec/semantica.md](spec/semantica.md) | Execution rules decided while building the prototype |
+| [spec/syntax.md](spec/syntax.md) | Syntax decisions, with rationale and token measurements |
+| [spec/semantics.md](spec/semantics.md) | Execution rules decided while building the prototype |
 | [spec/tessera.lark](spec/tessera.lark) | The formal grammar (LALR(1)) |
 | [tessera/](tessera/) | The prototype: parser, interpreter, static checks, WebAssembly compiler, sentinel |
-| [esempi/](esempi/) | `.tsr` programs. Runnable: `ciao`, `cassa`, `prezzi`, `magazzino`, `permessi`, `numeri`. Illustrative (they use modules not written yet): `server`, `addestramento`, `interop` |
+| [examples/](examples/) | `.tsr` programs. Runnable: `hello`, `checkout`, `prices`, `warehouse`, `permissions`, `numbers`. Illustrative (they use modules not written yet): `server`, `training`, `interop` |
 | [tests/](tests/) | Prototype tests |
-| [strumenti/controlla_grammatica.py](strumenti/controlla_grammatica.py) | Checks the grammar against the examples and 14 typical mistakes it must reject |
+| [tools/check_grammar.py](tools/check_grammar.py) | Checks the grammar against the examples and 14 typical mistakes it must reject |
 
 ## Author and citation
 

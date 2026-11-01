@@ -9,8 +9,8 @@ a runtime. Il resto del linguaggio non e' ancora supportato: la funzione viene s
 from dataclasses import dataclass, field
 
 from . import ast as A
-from .errori import ErroreTessera
-from .stampa import mostra
+from .errors import ErroreTessera
+from .printer import mostra
 
 TIPI = {"i32": "i32", "i64": "i64", "f64": "f64", "bool": "i32"}
 
@@ -105,7 +105,7 @@ def tipo_semplice(t, nodo):
 
 
 def mostra_tipo_breve(t):
-    from .stampa import mostra_tipo
+    from .printer import mostra_tipo
     return mostra_tipo(t)
 
 

@@ -46,7 +46,7 @@ python -m venv .venv
 Su Linux e macOS il percorso è `.venv/bin/pip`. Poi, con l'ambiente attivo:
 
 ```bash
-python -m tessera esegui esempi/cassa.tsr
+python -m tessera esegui examples/checkout.tsr
 ```
 
 | Comando | Cosa fa |
@@ -58,20 +58,20 @@ python -m tessera esegui esempi/cassa.tsr
 | `python -m tessera chiama file.tsr funzione arg... [--wasm]` | chiama una funzione, interpretata o compilata |
 | `python -m pytest tests` | 49 test, compresa la prova differenziale interprete contro WebAssembly |
 
-Cosa controlla già il prototipo: effetti dichiarati, contratti, tipi ai confini delle funzioni, `edit` e `take`, overflow, divisione per zero, permessi sui file del `process`, `Secret` mai stampati, `Result` mai ignorati, `match` esaustivi, requisiti di piattaforma. Le regole sono in [spec/semantica.md](spec/semantica.md).
+Cosa controlla già il prototipo: effetti dichiarati, contratti, tipi ai confini delle funzioni, `edit` e `take`, overflow, divisione per zero, permessi sui file del `process`, `Secret` mai stampati, `Result` mai ignorati, `match` esaustivi, requisiti di piattaforma. Le regole sono in [spec/semantics.md](spec/semantics.md).
 
 ## Contenuto
 
 | Percorso | Cosa contiene |
 |---|---|
 | [docs/paper.md](docs/paper.md) | Il paper: motivazioni, architettura, modello di sicurezza, valutazione |
-| [spec/sintassi.md](spec/sintassi.md) | Le decisioni di sintassi, con motivazioni e misure in token |
-| [spec/semantica.md](spec/semantica.md) | Le regole di esecuzione decise con il prototipo |
+| [spec/syntax.md](spec/syntax.md) | Le decisioni di sintassi, con motivazioni e misure in token |
+| [spec/semantics.md](spec/semantics.md) | Le regole di esecuzione decise con il prototipo |
 | [spec/tessera.lark](spec/tessera.lark) | La grammatica formale (LALR(1)) |
 | [tessera/](tessera/) | Il prototipo: analizzatore, interprete, controlli statici, compilatore WebAssembly, sentinella |
-| [esempi/](esempi/) | Programmi `.tsr`. Eseguibili: `ciao`, `cassa`, `prezzi`, `magazzino`, `permessi`, `numeri`. Illustrativi (usano moduli non ancora scritti): `server`, `addestramento`, `interop` |
+| [examples/](examples/) | Programmi `.tsr`. Eseguibili: `hello`, `checkout`, `prices`, `warehouse`, `permissions`, `numbers`. Illustrativi (usano moduli non ancora scritti): `server`, `training`, `interop` |
 | [tests/](tests/) | Test del prototipo |
-| [strumenti/controlla_grammatica.py](strumenti/controlla_grammatica.py) | Verifica la grammatica sugli esempi e su 14 errori tipici che deve rifiutare |
+| [tools/check_grammar.py](tools/check_grammar.py) | Verifica la grammatica sugli esempi e su 14 errori tipici che deve rifiutare |
 
 ## Autore e citazione
 

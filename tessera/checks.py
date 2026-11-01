@@ -9,9 +9,9 @@
 - varie: ? solo in funzioni che restituiscono Result o Option, break fuori dai cicli, unsafe fuori da kernel.
 """
 from . import ast as A
-from .errori import ErroreTessera
-from .interprete import FunzioneUtente, InfoSomma, INCORPORATI
-from .libreria import GLOBALI, METODI_MUTANTI
+from .errors import ErroreTessera
+from .interpreter import FunzioneUtente, InfoSomma, INCORPORATI
+from .library import GLOBALI, METODI_MUTANTI
 
 MUTANTI = {nome for metodi in METODI_MUTANTI.values() for nome in metodi}
 VARIANTI_INCORPORATE = {"Some": "Option", "None": "Option", "Ok": "Result", "Err": "Result"}

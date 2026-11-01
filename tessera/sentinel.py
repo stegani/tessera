@@ -7,7 +7,7 @@ Regola: se un requisito non si puo' verificare su questa macchina, il process no
 import platform
 from pathlib import Path
 
-from .errori import ErroreTessera
+from .errors import ErroreTessera
 
 VULNERABILITA = Path("/sys/devices/system/cpu/vulnerabilities")
 

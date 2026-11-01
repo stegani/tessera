@@ -3,7 +3,7 @@
 """Valori a runtime dell'interprete, uguaglianza strutturale e stampa."""
 from dataclasses import dataclass, field
 
-from .errori import ErroreTessera
+from .errors import ErroreTessera
 
 MIN_I64, MAX_I64 = -(2**63), 2**63 - 1
 LIMITI_INTERI = {

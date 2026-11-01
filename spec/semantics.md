@@ -1,6 +1,6 @@
 # Semantica di Tessera — prototipo 0.1
 
-Le regole che il prototipo applica durante l'esecuzione, decise mentre si scrivevano l'interprete ([tessera/interprete.py](../tessera/interprete.py)) e il compilatore ([tessera/compilatore_wasm.py](../tessera/compilatore_wasm.py)). Le decisioni di sintassi sono in [sintassi.md](sintassi.md).
+Le regole che il prototipo applica durante l'esecuzione, decise mentre si scrivevano l'interprete ([tessera/interpreter.py](../tessera/interpreter.py)) e il compilatore ([tessera/wasm_compiler.py](../tessera/wasm_compiler.py)). Le decisioni di sintassi sono in [syntax.md](syntax.md).
 
 ## Numeri
 

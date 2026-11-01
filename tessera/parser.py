@@ -8,7 +8,7 @@ from lark import Lark, Token, Transformer, v_args
 from lark.exceptions import UnexpectedInput, VisitError
 
 from . import ast as A
-from .errori import ErroreTessera
+from .errors import ErroreTessera
 
 GRAMMATICA = Path(__file__).resolve().parent.parent / "spec" / "tessera.lark"
 

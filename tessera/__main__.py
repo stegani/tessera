@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-from .errori import ErroreTessera
+from .errors import ErroreTessera
 
 
 def stampa_errori(errori, in_json):
@@ -22,8 +22,8 @@ def stampa_errori(errori, in_json):
 
 
 def carica(file):
-    from .controlli import controlla_programma
-    from .interprete import Programma
+    from .checks import controlla_programma
+    from .interpreter import Programma
     programma = Programma(file)
     return programma, controlla_programma(programma)
 
@@ -37,7 +37,7 @@ def comando_verifica(args):
 
 
 def comando_esegui(args):
-    from .interprete import Interprete
+    from .interpreter import Interprete
     programma, errori = carica(args.file)
     if errori:
         stampa_errori(errori, args.json)
@@ -47,7 +47,7 @@ def comando_esegui(args):
 
 
 def comando_prova(args):
-    from .interprete import Interprete
+    from .interpreter import Interprete
     programma, errori = carica(args.file)
     if errori:
         stampa_errori(errori, args.json)
@@ -66,8 +66,8 @@ def comando_prova(args):
 
 
 def comando_compila(args):
-    from .compilatore_wasm import binario, compila_modulo
-    from .sintassi import analizza_file
+    from .wasm_compiler import binario, compila_modulo
+    from .parser import analizza_file
     _, errori = carica(args.file)
     if errori:
         stampa_errori(errori, args.json)
@@ -107,8 +107,8 @@ def converti(testo, tipo):
 
 
 def comando_chiama(args):
-    from .interprete import Interprete
-    from .valori import formatta
+    from .interpreter import Interprete
+    from .values import formatta
     programma, errori = carica(args.file)
     if errori:
         stampa_errori(errori, args.json)
@@ -121,7 +121,7 @@ def comando_chiama(args):
         raise ErroreTessera("tipo", f"{args.funzione} vuole {len(parametri)} argomenti")
     valori = [converti(t, p.tipo) for t, p in zip(args.argomenti, parametri)]
     if args.wasm:
-        from .compilatore_wasm import Esecutore, compila_modulo
+        from .wasm_compiler import Esecutore, compila_modulo
         risultato = Esecutore(compila_modulo(programma.principale.ast)).chiama(args.funzione, valori)
     else:
         risultato = Interprete(programma).chiama_per_nome(args.funzione, valori)

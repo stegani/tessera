@@ -1,10 +1,10 @@
 # Sintassi di Tessera — bozza 0.1
 
-Bozza del 01/11/2026. La grammatica formale è [tessera.lark](tessera.lark) (LALR(1), verificata senza conflitti); gli esempi sono in [esempi/](../esempi/); la verifica si lancia con:
+Bozza del 01/11/2026. La grammatica formale è [tessera.lark](tessera.lark) (LALR(1), verificata senza conflitti); gli esempi sono in [examples/](../examples/); la verifica si lancia con:
 
 ```bash
 pip install "lark[interegular]"
-python strumenti/controlla_grammatica.py
+python tools/check_grammar.py
 ```
 
 ## Il criterio
@@ -20,15 +20,15 @@ Ogni scelta deve rispondere a una domanda: **riduce gli errori di un modello, o 
 | 3 | L'istruzione finisce a fine riga; niente `;`. Dentro parentesi si può andare a capo. L'indentazione non conta per il parser | | Nessun errore di indentazione alla Python; il formattatore impone comunque un'indentazione unica |
 | 4 | Tipi in `PascalCase`, tutto il resto in `snake_case`, imposto dalla grammatica | `ParseError`, `parse_price` | Il caso dice cos'è un nome senza cercarne la dichiarazione |
 | 5 | Generici con le quadre | `Result[Cents, ParseError]` | Nessuna ambiguità con `<` e `>` |
-| 6 | Firma con clausole in **ordine fisso**: `doc`, `effects` (obbligatoria), `requires`, `ensures`, `example`, `budget` | vedi [prezzi.tsr](../esempi/prezzi.tsr) | La firma è tutto ciò che serve per usare la funzione, sempre nello stesso posto |
+| 6 | Firma con clausole in **ordine fisso**: `doc`, `effects` (obbligatoria), `requires`, `ensures`, `example`, `budget` | vedi [prices.tsr](../examples/prices.tsr) | La firma è tutto ciò che serve per usare la funzione, sempre nello stesso posto |
 | 7 | Import espliciti, mai `*` | `from std.net import Request, Response` | Ogni nome usato ha una provenienza visibile nel file |
 | 8 | **Proprietà senza simboli e senza lifetime.** I parametri sono in sola lettura; `edit` li modifica, `take` li consuma. La parola si ripete alla chiamata. Nessun riferimento dentro le strutture | `train_step(edit params, batch, 0.001)` | Le annotazioni di durata (*lifetime*) sono la parte di Rust in cui i modelli sbagliano di più. Così non servono: è il modello a "semantica dei valori mutabili" del linguaggio Hylo. Alla chiamata si vede cosa cambia |
 | 9 | Solo funzioni libere; `p.norm()` è un altro modo di scrivere `norm(p)` | | Un solo modo di dichiarare comportamento: niente classi, `impl`, ereditarietà |
-| 10 | `type` per strutture (campi) e somme (varianti `case`); `type Cents = i64` crea un tipo **distinto**, non un sinonimo | vedi [prezzi.tsr](../esempi/prezzi.tsr) | Centesimi e interi non si mescolano per sbaglio |
+| 10 | `type` per strutture (campi) e somme (varianti `case`); `type Cents = i64` crea un tipo **distinto**, non un sinonimo | vedi [prices.tsr](../examples/prices.tsr) | Centesimi e interi non si mescolano per sbaglio |
 | 11 | `return` sempre esplicito | | Il ritorno implicito dell'ultima espressione è una fonte nota di confusione |
 | 12 | Errori come valori: `Result`, `Option`, propagazione con `?`; varianti come in Rust | `Ok`, `Err`, `Some`, `None` | Familiare ai modelli; nessuna eccezione invisibile |
 | 13 | Logica a parole: `and`, `or`, `not`, `implies`. **`and` e `or` non si mescolano senza parentesi; i confronti non si concatenano** | `(a and b) or c`; `0 <= x and x < n` | Nessuna sorpresa di precedenza. La grammatica lo impone |
-| 14 | `match` con `case pattern:` e guardie `if` | vedi [server.tsr](../esempi/server.tsr) | Forma di Python 3.10, controllo di esaustività come Rust |
+| 14 | `match` con `case pattern:` e guardie `if` | vedi [server.tsr](../examples/server.tsr) | Forma di Python 3.10, controllo di esaustività come Rust |
 | 15 | Commenti con `--`; la documentazione sta nella clausola `doc:` | | La documentazione è parte strutturata della firma, non testo libero |
 | 16 | Codice solo ASCII (le stringhe possono contenere altro) | `implies`, non `⇒` | I simboli rari costano più token e si sbagliano di più (misure sotto) |
 | 17 | Stringhe con interpolazione sempre attiva | `"Rimborso di {amount} avviato"` | Un solo modo; interpolare un `Secret` è un errore di compilazione |
@@ -43,7 +43,7 @@ Ogni scelta deve rispondere a una domanda: **riduce gli errori di un modello, o 
 Il controllo del 01/11/2026 ha dato:
 
 - grammatica LALR(1) senza conflitti in modalità rigorosa;
-- 4 esempi accettati: [prezzi.tsr](../esempi/prezzi.tsr), [server.tsr](../esempi/server.tsr), [addestramento.tsr](../esempi/addestramento.tsr), [interop.tsr](../esempi/interop.tsr);
+- 4 esempi accettati: [prices.tsr](../examples/prices.tsr), [server.tsr](../examples/server.tsr), [training.tsr](../examples/training.tsr), [interop.tsr](../examples/interop.tsr);
 - 14 errori tipici rifiutati. Per esempio, le clausole fuori ordine danno:
 
 ```json

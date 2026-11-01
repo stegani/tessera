@@ -4,9 +4,9 @@ module permessi
 
 process main
   effects: console, fs
-  grants: fs.read("dati")
+  grants: fs.read("data")
 do
-  match read_text("dati/benvenuto.txt") do
+  match read_text("data/welcome.txt") do
     case Ok(text):
       print("Letto: {text.trim()}")
     case Err(problem):
