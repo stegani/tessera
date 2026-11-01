@@ -1,11 +1,11 @@
 # Tessera
 
-**Un linguaggio di programmazione scritto dalle IA e blindato contro le IA.**
-Effetti dichiarati, contratti verificati, vulnerabilità che non compilano.
+*English · [Italiano](README.it.md)*
 
-> *A programming language written by AI, hardened against AI.*
+**A programming language written by AI, hardened against AI.**
+Declared effects, verified contracts, vulnerabilities that don't compile.
 
-Le IA scrivono sempre più codice, e le stesse capacità servono a trovarne le falle su scala enorme. Tessera sposta la sicurezza dal programmatore al compilatore: ciò che un'IA può sbagliare o sfruttare deve diventare un errore di compilazione.
+AI systems write more and more code, and the same abilities can find its flaws at enormous scale. Tessera moves security from the programmer to the compiler: whatever an AI could get wrong or exploit should become a compile error.
 
 ```
 fn parse_price(text: Str) -> Result[Cents, ParseError]
@@ -19,68 +19,79 @@ do
 end fn parse_price
 ```
 
-Chi usa `parse_price` sa dalla firma cosa riceve, cosa può fallire, quali condizioni valgono e che la funzione non tocca rete, file o stato.
+Anyone calling `parse_price` learns from the signature alone what it takes, how it can fail, which conditions hold, and that it touches no network, files or state.
 
-## Stato
+## Key ideas
 
-**Prototipo 0.1.** Esistono un interprete completo per il nucleo del linguaggio, i controlli statici e un compilatore verso WebAssembly per le funzioni numeriche pure. È scritto in Python per arrivare in fretta all'esperimento della fase 1; il compilatore definitivo verrà riscritto quando il linguaggio sarà stabile.
+- **Effects in the signature**: a function declares what it can do besides computing (`console`, `fs`, `net`, `gpu`, `llm`…); calling something with undeclared effects is rejected.
+- **Resources as unique permissions**: files, sockets, GPU memory and even a per-process IPv6 identity are linear values, acquired at start and released automatically.
+- **Ownership without lifetimes**: parameters are read-only by default; `edit` mutates and `take` consumes, and the word is repeated at the call site.
+- **Contracts**: `requires`, `ensures`, `invariant` and `example` clauses, checked at every call.
+- **Untrusted AI output**: values produced by a language model are typed `Untrusted[T]` and cannot trigger effects without validation.
+- **Hardware sentinel**: a `process` declares the platform guarantees it needs (`platform: ecc, spectre_mitigations`) and does not start where they cannot be verified.
 
-| Fase | Cosa | Stato |
+The full design is in the paper (in Italian): [docs/paper.md](docs/paper.md).
+
+## Status
+
+**Prototype 0.1.** A complete interpreter for the language core, static checks, and a WebAssembly compiler for pure numeric functions. It is written in Python to reach the phase 1 experiment quickly; the final compiler will be rewritten once the language is stable.
+
+| Phase | What | Status |
 |---|---|---|
-| 0 | Paper e sintassi | fatto |
-| 1 | Interprete, controlli statici, primo compilatore WebAssembly | fatto (0.1) |
-| 1 | Esperimento: Tessera contro Python con un modello linguistico | da fare |
-| 2 | Nucleo: tipi statici, compilatore WebAssembly completo, capability di rete | da fare |
-| 3 | Addestramento di IA: tensori, derivazione, provenienza dei dati | da fare |
-| 4 | Verifica e domini: compilatore verificato, database, web, kernel | da fare |
+| 0 | Paper and syntax | done |
+| 1 | Interpreter, static checks, first WebAssembly compiler | done (0.1) |
+| 1 | Experiment: Tessera vs Python written by a language model | to do |
+| 2 | Core: static types, full WebAssembly compiler, network capabilities | to do |
+| 3 | AI training: tensors, differentiation, data provenance | to do |
+| 4 | Verification and domains: verified compiler, databases, web, kernel | to do |
 
-## Provare
+## Try it
 
 ```bash
 python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt
 ```
 
-Su Linux e macOS il percorso è `.venv/bin/pip`. Poi, con l'ambiente attivo:
+On Linux and macOS the path is `.venv/bin/pip`. Then, with the environment active:
 
 ```bash
-python -m tessera esegui esempi/cassa.tsr
+python -m tessera run esempi/cassa.tsr
 ```
 
-| Comando | Cosa fa |
+| Command | What it does |
 |---|---|
-| `python -m tessera esegui file.tsr` | controlla il programma ed esegue il `process` o `fn main()` |
-| `python -m tessera verifica file.tsr` | controlli statici senza eseguire (`--json` per errori leggibili da un modello) |
-| `python -m tessera prova file.tsr` | esegue le clausole `example` come test |
-| `python -m tessera compila file.tsr -o build` | produce `.wat` e `.wasm` |
-| `python -m tessera chiama file.tsr funzione arg... [--wasm]` | chiama una funzione, interpretata o compilata |
-| `python -m pytest tests` | 49 test, compresa la prova differenziale interprete contro WebAssembly |
+| `python -m tessera run file.tsr` | checks the program and runs its `process` or `fn main()` |
+| `python -m tessera check file.tsr` | static checks without running (`--json` for errors a model can read) |
+| `python -m tessera test file.tsr` | runs the `example` clauses as tests |
+| `python -m tessera build file.tsr -o build` | produces `.wat` and `.wasm` |
+| `python -m tessera call file.tsr function arg... [--wasm]` | calls a function, interpreted or compiled |
+| `python -m pytest tests` | 49 tests, including differential testing of the interpreter against WebAssembly |
 
-Cosa controlla già il prototipo: effetti dichiarati, contratti, tipi ai confini delle funzioni, `edit` e `take`, overflow, divisione per zero, permessi sui file del `process`, `Secret` mai stampati, `Result` mai ignorati, `match` esaustivi, requisiti di piattaforma. Le regole sono in [spec/semantica.md](spec/semantica.md).
+The prototype already enforces: declared effects, contracts, types at function boundaries, `edit` and `take`, integer overflow, division by zero, file permissions granted by the `process`, `Secret` values never printed, `Result` values never ignored, exhaustive `match`, platform requirements. Messages and documentation are currently in Italian; the rules are in [spec/semantica.md](spec/semantica.md).
 
-## Contenuto
+## Repository layout
 
-| Percorso | Cosa contiene |
+| Path | Contents |
 |---|---|
-| [docs/paper.md](docs/paper.md) | Il paper: motivazioni, architettura, modello di sicurezza, valutazione |
-| [spec/sintassi.md](spec/sintassi.md) | Le decisioni di sintassi, con motivazioni e misure in token |
-| [spec/semantica.md](spec/semantica.md) | Le regole di esecuzione decise con il prototipo |
-| [spec/tessera.lark](spec/tessera.lark) | La grammatica formale (LALR(1)) |
-| [tessera/](tessera/) | Il prototipo: analizzatore, interprete, controlli statici, compilatore WebAssembly, sentinella |
-| [esempi/](esempi/) | Programmi `.tsr`. Eseguibili: `ciao`, `cassa`, `prezzi`, `magazzino`, `permessi`, `numeri`. Illustrativi (usano moduli non ancora scritti): `server`, `addestramento`, `interop` |
-| [tests/](tests/) | Test del prototipo |
-| [strumenti/controlla_grammatica.py](strumenti/controlla_grammatica.py) | Verifica la grammatica sugli esempi e su 14 errori tipici che deve rifiutare |
+| [docs/paper.md](docs/paper.md) | The paper: motivation, architecture, security model, evaluation |
+| [spec/sintassi.md](spec/sintassi.md) | Syntax decisions, with rationale and token measurements |
+| [spec/semantica.md](spec/semantica.md) | Execution rules decided while building the prototype |
+| [spec/tessera.lark](spec/tessera.lark) | The formal grammar (LALR(1)) |
+| [tessera/](tessera/) | The prototype: parser, interpreter, static checks, WebAssembly compiler, sentinel |
+| [esempi/](esempi/) | `.tsr` programs. Runnable: `ciao`, `cassa`, `prezzi`, `magazzino`, `permessi`, `numeri`. Illustrative (they use modules not written yet): `server`, `addestramento`, `interop` |
+| [tests/](tests/) | Prototype tests |
+| [strumenti/controlla_grammatica.py](strumenti/controlla_grammatica.py) | Checks the grammar against the examples and 14 typical mistakes it must reject |
 
-## Autore e citazione
+## Author and citation
 
-Tessera è un'idea originale di **Stefano Stegani**, che ne ha scritto il progetto, la grammatica e il paper. Il codice e i testi si possono riusare, anche in progetti commerciali, alle condizioni della licenza: **chi redistribuisce Tessera o un'opera derivata deve conservare il file [NOTICE](NOTICE), che attribuisce l'opera all'autore**, e non può presentarla come propria.
+Tessera is an original idea by **Stefano Stegani**, who wrote its design, grammar and paper. The code and texts may be reused, including commercially, under the license terms: **anyone redistributing Tessera or a derivative work must keep the [NOTICE](NOTICE) file, which credits the author**, and may not present it as their own.
 
-Per citare il progetto:
+To cite the project:
 
-> Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA*, 2026. https://github.com/stegani/tessera
+> Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA* (Tessera: written by AI, hardened against AI), 2026. https://github.com/stegani/tessera
 
-Il file [CITATION.cff](CITATION.cff) contiene gli stessi dati in forma leggibile dalle macchine: GitHub lo usa per il pulsante "Cite this repository".
+The [CITATION.cff](CITATION.cff) file holds the same data in machine-readable form; GitHub uses it for the "Cite this repository" button.
 
-## Licenza
+## License
 
-[Apache 2.0](LICENSE), con l'avviso di attribuzione in [NOTICE](NOTICE).
+[Apache 2.0](LICENSE), with the attribution notice in [NOTICE](NOTICE).
