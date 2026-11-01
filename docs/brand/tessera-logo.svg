@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-label="Tessera: written by AI, hardened against AI">
+  <title>Tessera</title>
+  <g transform="translate(40 40) scale(0.546875)">
+    <rect width="512" height="512" rx="104" fill="#0E1726"/>
+    <rect x="72" y="72" width="112" height="112" rx="16" fill="#2EC4B6"/>
+  <rect x="200" y="72" width="112" height="112" rx="16" fill="#3DD6C6"/>
+  <rect x="328" y="72" width="112" height="112" rx="16" fill="#26AFA2"/>
+  <rect x="74" y="202" width="108" height="108" rx="16" fill="#1A2740" stroke="#2B3B57" stroke-width="4"/>
+  <rect x="200" y="200" width="112" height="112" rx="16" fill="#34CDBE"/>
+  <rect x="330" y="202" width="108" height="108" rx="16" fill="#1A2740" stroke="#2B3B57" stroke-width="4"/>
+  <rect x="74" y="330" width="108" height="108" rx="16" fill="#1A2740" stroke="#2B3B57" stroke-width="4"/>
+  <rect x="200" y="328" width="112" height="112" rx="16" fill="#F4B942"/>
+  <rect x="330" y="330" width="108" height="108" rx="16" fill="#1A2740" stroke="#2B3B57" stroke-width="4"/>
+  </g>
+  <text x="352" y="196" font-family="'Segoe UI', Inter, 'Helvetica Neue', Arial, sans-serif" font-size="150" font-weight="700" fill="#0E1726" letter-spacing="-3">Tessera</text>
+  <text x="358" y="262" font-family="'Segoe UI', Inter, 'Helvetica Neue', Arial, sans-serif" font-size="38" fill="#6B7A90">written by AI, hardened against AI</text>
+</svg>

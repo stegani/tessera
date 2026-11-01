@@ -1,4 +1,9 @@
-# Tessera
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/tessera-logo-dark.png">
+    <img src="docs/brand/tessera-logo.png" alt="Tessera: scritto dalle IA, blindato contro le IA" width="560">
+  </picture>
+</p>
 
 *[English](README.md) · Italiano*
 
