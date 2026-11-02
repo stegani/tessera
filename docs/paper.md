@@ -569,4 +569,4 @@ Tessera è un'opera originale di Stefano Stegani, distribuita con licenza Apache
 
 Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA*, 2026. [github.com/stegani/tessera](https://github.com/stegani/tessera)
 
-DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820), archiviato su Zenodo il 1 novembre 2026. Il DOI punta sempre all'ultima versione; la versione 0.1.0 ha il DOI [10.5281/zenodo.23855821](https://doi.org/10.5281/zenodo.23855821).
+DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820), archiviato su Zenodo il 1 novembre 2026. Il DOI punta sempre all'ultima versione; la versione 0.1.0 ha il DOI [10.5281/zenodo.23855821](https://doi.org/10.5281/zenodo.23855821), la 0.2.0 il DOI [10.5281/zenodo.23881717](https://doi.org/10.5281/zenodo.23881717).

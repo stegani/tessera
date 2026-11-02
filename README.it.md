@@ -81,7 +81,7 @@ Cosa controlla già il prototipo: effetti dichiarati, contratti, tipi ai confini
 | [spec/tessera.lark](spec/tessera.lark) | La grammatica formale (LALR(1)) |
 | [tessera/](tessera/) | Il prototipo: analizzatore, interprete, controlli statici, compilatore WebAssembly, sentinella |
 | [examples/](examples/) | Programmi `.tsr`. Eseguibili: `hello`, `checkout`, `prices`, `warehouse`, `permissions`, `numbers`. Illustrativi (usano moduli non ancora scritti): `server`, `training`, `interop` |
-| [experiment/](experiment/) | Esperimento della fase 1: 20 esercizi con test nascosti sui casi limite, risolti da Claude in Tessera e in Python |
+| [experiment/](experiment/) | Esperimento della fase 1: 20 esercizi con test nascosti sui casi limite, scritti dallo stesso modello in Tessera e in Python; gira con modelli locali (Ollama, LM Studio), i modelli commerciali sono facoltativi |
 | [tests/](tests/) | Test del prototipo |
 | [tools/check_grammar.py](tools/check_grammar.py) | Verifica la grammatica sugli esempi e su 14 errori tipici che deve rifiutare |
 
@@ -93,7 +93,7 @@ Per citare il progetto:
 
 > Stefano Stegani, *Tessera: written by AI, hardened against AI* (Tessera: scritto dalle IA, blindato contro le IA), 2026. DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820)
 
-Il DOI punta sempre all'ultima versione; la versione 0.1.0 ha un DOI proprio, [10.5281/zenodo.23855821](https://doi.org/10.5281/zenodo.23855821), archiviato su Zenodo.
+Il DOI punta sempre all'ultima versione. Ogni versione ha anche un DOI proprio, archiviato su Zenodo: 0.2.0 [10.5281/zenodo.23881717](https://doi.org/10.5281/zenodo.23881717), 0.1.0 [10.5281/zenodo.23855821](https://doi.org/10.5281/zenodo.23855821).
 
 Il file [CITATION.cff](CITATION.cff) contiene gli stessi dati in forma leggibile dalle macchine: GitHub lo usa per il pulsante "Cite this repository".
 

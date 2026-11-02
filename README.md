@@ -89,7 +89,7 @@ The prototype already enforces: declared effects, contracts, types at function b
 | [spec/tessera.lark](spec/tessera.lark) | The formal grammar (LALR(1)) |
 | [tessera/](tessera/) | The prototype: parser, interpreter, static checks, WebAssembly compiler, sentinel |
 | [examples/](examples/) | `.tsr` programs. Runnable: `hello`, `checkout`, `prices`, `warehouse`, `permissions`, `numbers`. Illustrative (they use modules not written yet): `server`, `training`, `interop` |
-| [experiment/](experiment/) | Phase 1 experiment: 20 tasks with hidden edge-case tests, run by Claude in Tessera and in Python |
+| [experiment/](experiment/) | Phase 1 experiment: 20 tasks with hidden edge-case tests, written by the same model in Tessera and in Python; runs with local models (Ollama, LM Studio), commercial models optional |
 | [tests/](tests/) | Prototype tests |
 | [tools/check_grammar.py](tools/check_grammar.py) | Checks the grammar against the examples and 14 typical mistakes it must reject |
 
@@ -101,7 +101,7 @@ To cite the project:
 
 > Stefano Stegani, *Tessera: written by AI, hardened against AI*, 2026. DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820)
 
-The DOI always points to the latest version; version 0.1.0 has its own DOI, [10.5281/zenodo.23855821](https://doi.org/10.5281/zenodo.23855821), archived on Zenodo.
+The DOI always points to the latest version. Each version also has its own DOI, archived on Zenodo: 0.2.0 [10.5281/zenodo.23881717](https://doi.org/10.5281/zenodo.23881717), 0.1.0 [10.5281/zenodo.23855821](https://doi.org/10.5281/zenodo.23855821).
 
 The [CITATION.cff](CITATION.cff) file holds the same data in machine-readable form; GitHub uses it for the "Cite this repository" button.
 
