@@ -5,7 +5,7 @@ type: software
 authors:
   - family-names: Stegani
     given-names: Stefano
-version: 0.1.0
+version: 0.2.0
 doi: 10.5281/zenodo.23855820
 identifiers:
   - type: doi
@@ -14,7 +14,7 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.23855821
     description: Versione / version 0.1.0
-date-released: 2026-11-01
+date-released: 2026-11-02
 license: Apache-2.0
 repository-code: "https://github.com/stegani/tessera"
 abstract: >-

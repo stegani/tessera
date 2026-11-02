@@ -9,17 +9,18 @@ from lark.exceptions import UnexpectedInput, VisitError
 
 from . import ast as A
 from .errors import ErroreTessera
+from .hints import suggerimento
 
 GRAMMATICA = Path(__file__).resolve().parent.parent / "spec" / "tessera.lark"
 
-# Nomi leggibili per i simboli che il parser si aspettava.
+# Nomi leggibili per i simboli che il parser si aspettava. In inglese: li legge soprattutto un modello.
 SIMBOLI = {
-    "_NL": "a capo", "LPAR": "(", "RPAR": ")", "LSQB": "[", "RSQB": "]", "COLON": ":",
+    "_NL": "end of line", "LPAR": "(", "RPAR": ")", "LSQB": "[", "RSQB": "]", "COLON": ":",
     "COMMA": ",", "DOT": ".", "EQUAL": "=", "MINUS": "-", "QMARK": "?", "AT": "@",
-    "NAME": "nome", "TYPE_NAME": "nome di tipo", "INT": "intero", "FLOAT": "decimale",
-    "STRING": "stringa", "QUANTITY": "quantita'", "ADD_OP": "+ o -", "MUL_OP": "* / % @",
-    "COMP_OP": "confronto", "ASSIGN_OP": "assegnazione", "MODE": "edit o take",
-    "PRIMITIVE": "tipo primitivo", "PUB": "pub", "CRITICAL": "critical", "NONE": "none",
+    "NAME": "name", "TYPE_NAME": "type name", "INT": "integer", "FLOAT": "decimal",
+    "STRING": "string", "QUANTITY": "quantity", "ADD_OP": "+ or -", "MUL_OP": "* / % @",
+    "COMP_OP": "comparison", "ASSIGN_OP": "assignment", "MODE": "edit or take",
+    "PRIMITIVE": "primitive type", "PUB": "pub", "CRITICAL": "critical", "NONE": "none",
 }
 ESCAPE = {"n": "\n", "t": "\t", '"': '"', "\\": "\\", "{": "{", "}": "}"}
 
@@ -40,14 +41,21 @@ def simbolo(nome):
     return SIMBOLI.get(nome, nome.lower())
 
 
-def errore_di_sintassi(err, file):
+def errore_di_sintassi(err, file, testo=""):
     trovato = getattr(err, "token", None)
+    if trovato is None and getattr(err, "char", None):
+        trovato_testo = err.char                        # errore del lessico: un carattere che Tessera non usa
+    else:
+        trovato_testo = str(trovato) if trovato is not None else "?"
     attesi = sorted({simbolo(n) for n in (getattr(err, "expected", None) or getattr(err, "allowed", None) or [])})
-    testo_trovato = "fine riga" if trovato is not None and trovato.type == "_NL" else repr(str(trovato or "?"))
+    fine_riga = trovato is not None and getattr(trovato, "type", "") == "_NL"
+    righe = testo.splitlines()
+    testo_riga = righe[err.line - 1] if testo and 0 < (err.line or 0) <= len(righe) else ""
     return ErroreTessera(
         "sintassi",
-        f"trovato {testo_trovato}, atteso uno tra: {', '.join(attesi[:10])}",
+        f"unexpected {'end of line' if fine_riga else repr(trovato_testo)}, expected one of: {', '.join(attesi[:10])}",
         riga=err.line, colonna=err.column, file=file,
+        suggerimento=suggerimento(testo_riga, "" if fine_riga else trovato_testo, attesi),
     )
 
 
@@ -58,7 +66,7 @@ def analizza(testo, file=None):
     try:
         albero = parser().parse(testo, start="start")
     except UnexpectedInput as err:
-        raise errore_di_sintassi(err, file) from None
+        raise errore_di_sintassi(err, file, testo) from None
     try:
         modulo = CostruisciAST(file).transform(albero)
     except VisitError as err:
@@ -103,22 +111,22 @@ class CostruisciAST(Transformer):
             if c == "\\":
                 seguente = corpo[i + 1]
                 if seguente not in ESCAPE:
-                    raise ErroreTessera("sintassi", f"sequenza di escape sconosciuta: \\{seguente}", riga=token.line, file=self.file)
+                    raise ErroreTessera("sintassi", f"unknown escape sequence: \\{seguente}", riga=token.line, file=self.file)
                 buffer.append(ESCAPE[seguente])
                 i += 2
             elif c == "{" and interpola:
                 fine = corpo.find("}", i)
                 if fine < 0:
-                    raise ErroreTessera("sintassi", "'{' senza '}' nella stringa", riga=token.line, file=self.file,
-                                        suggerimento="per una graffa letterale scrivi \\{")
+                    raise ErroreTessera("sintassi", "'{' without '}' in the string", riga=token.line, file=self.file,
+                                        suggerimento="for a literal brace write \\{")
                 if buffer:
                     parti.append("".join(buffer))
                     buffer = []
                 parti.append(self.espressione_interna(corpo[i + 1:fine], token.line))
                 i = fine + 1
             elif c == "}" and interpola:
-                raise ErroreTessera("sintassi", "'}' senza '{' nella stringa", riga=token.line, file=self.file,
-                                    suggerimento="per una graffa letterale scrivi \\}")
+                raise ErroreTessera("sintassi", "'}' without '{' in the string", riga=token.line, file=self.file,
+                                    suggerimento="for a literal brace write \\}")
             else:
                 buffer.append(c)
                 i += 1
@@ -132,7 +140,7 @@ class CostruisciAST(Transformer):
         except UnexpectedInput as err:
             e = errore_di_sintassi(err, self.file)
             e.riga = riga_stringa
-            e.messaggio = f"nell'interpolazione {{{testo}}}: {e.messaggio}"
+            e.messaggio = f"in the interpolation {{{testo}}}: {e.messaggio}"
             raise e from None
         espressione = CostruisciAST(self.file).transform(albero)
         _imposta_riga(espressione, riga_stringa)
@@ -172,8 +180,8 @@ class CostruisciAST(Transformer):
 
     def controlla_chiusura(self, tipo, apertura, chiusura):
         if str(apertura) != str(chiusura):
-            raise ErroreTessera("sintassi", f"{tipo} '{apertura}' chiuso con 'end {tipo} {chiusura}'",
-                                riga=chiusura.line, file=self.file, suggerimento=f"scrivi 'end {tipo} {apertura}'")
+            raise ErroreTessera("sintassi", f"{tipo} '{apertura}' is closed with 'end {tipo} {chiusura}'",
+                                riga=chiusura.line, file=self.file, suggerimento=f"write 'end {tipo} {apertura}'")
 
     def fn_decl(self, meta, c):
         pub, critica, n, generici, parametri, ritorno, clausole, corpo, chiusura = c
@@ -286,8 +294,8 @@ class CostruisciAST(Transformer):
         campi = [(x[1], x[2]) for x in resto if x[0] == "campo"]
         varianti = [x[1] for x in resto if x[0] == "variante"]
         if campi and varianti:
-            raise ErroreTessera("sintassi", f"il tipo {n} mescola campi e varianti", riga=riga(meta), file=self.file,
-                                suggerimento="una struttura ha solo campi, un tipo somma solo varianti 'case'")
+            raise ErroreTessera("sintassi", f"type {n} mixes fields and variants", riga=riga(meta), file=self.file,
+                                suggerimento="a struct has only fields, a sum type only 'case' variants")
         return A.TipoComposto(str(n), pub is not None, generici or [], invarianti, campi, varianti, riga=riga(meta))
 
     def invariant_clause(self, meta, c):
@@ -355,7 +363,7 @@ class CostruisciAST(Transformer):
         if op is None:
             return A.Espressione(espressione, riga=riga(meta))
         if not isinstance(espressione, (A.Nome, A.Campo, A.Indice)):
-            raise ErroreTessera("sintassi", "si puo' assegnare solo a una variabile, a un campo o a un elemento",
+            raise ErroreTessera("sintassi", "you can only assign to a variable, a field or a list element",
                                 riga=riga(meta), file=self.file)
         return A.Assegna(espressione, str(op), valore, riga=riga(meta))
 
@@ -398,7 +406,7 @@ class CostruisciAST(Transformer):
     def literal_pattern(self, meta, c):
         valore = c[0]
         if isinstance(valore, A.Testo) and any(not isinstance(p, str) for p in valore.parti):
-            raise ErroreTessera("sintassi", "uno schema non puo' contenere interpolazioni", riga=riga(meta), file=self.file)
+            raise ErroreTessera("sintassi", "a pattern cannot contain interpolations", riga=riga(meta), file=self.file)
         return A.SchemaLetterale(valore, riga=riga(meta))
 
     def variant_pattern(self, meta, c):
@@ -422,7 +430,7 @@ class CostruisciAST(Transformer):
         for unita, fattore in (("KB", 1024), ("MB", 1024**2), ("GB", 1024**3), ("TB", 1024**4), ("ms", 1), ("s", 1000)):
             if testo.endswith(unita):
                 return int(testo[: -len(unita)]) * fattore
-        raise ErroreTessera("sintassi", f"quantita' non valida: {token}", riga=token.line, file=self.file)
+        raise ErroreTessera("sintassi", f"invalid quantity: {token}", riga=token.line, file=self.file)
 
     def literal(self, meta, c):
         token = c[0]

@@ -99,10 +99,27 @@ def richiesta(task, lingua):
     return "\n".join(parti)
 
 
+def errori_leggibili(testo):
+    """Gli errori di Tessera arrivano come JSON, uno per riga: li riscrive come 'line N: ...' con il suggerimento."""
+    import json
+    righe = []
+    for riga in testo.splitlines():
+        try:
+            e = json.loads(riga)
+        except ValueError:
+            righe.append(riga)
+            continue
+        prefisso = f"line {e['riga']}: " if e.get("riga") else ""
+        righe.append(prefisso + e.get("messaggio", riga))
+        if e.get("suggerimento"):
+            righe.append(f"  Hint: {e['suggerimento']}")
+    return "\n".join(righe)
+
+
 def correzione(task, lingua, esito):
     """Messaggio di ritorno dopo un tentativo fallito: solo i test visibili, mai quelli nascosti."""
     if esito.get("compile_error"):
-        return ("Your code was rejected:\n```\n" + esito["compile_error"] +
+        return ("Your code was rejected:\n```\n" + errori_leggibili(esito["compile_error"]) +
                 "\n```\nFix it and reply with the complete corrected code.")
     righe = []
     for test, r in zip(task["visible"], esito["results"]):

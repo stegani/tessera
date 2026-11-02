@@ -34,12 +34,12 @@ Chi usa `parse_price` sa dalla firma cosa riceve, cosa può fallire, quali condi
 
 ## Stato
 
-**Prototipo 0.1.** Esistono un interprete completo per il nucleo del linguaggio, i controlli statici e un compilatore verso WebAssembly per le funzioni numeriche pure. È scritto in Python per arrivare in fretta all'esperimento della fase 1; il compilatore definitivo verrà riscritto quando il linguaggio sarà stabile.
+**Prototipo 0.2.** Esistono un interprete completo per il nucleo del linguaggio, i controlli statici e un compilatore verso WebAssembly per le funzioni numeriche pure. È scritto in Python per arrivare in fretta all'esperimento della fase 1; il compilatore definitivo verrà riscritto quando il linguaggio sarà stabile.
 
 | Fase | Cosa | Stato |
 |---|---|---|
 | 0 | Paper e sintassi | fatto |
-| 1 | Interprete, controlli statici, primo compilatore WebAssembly | fatto (0.1) |
+| 1 | Interprete, controlli statici, primo compilatore WebAssembly | fatto (0.1, suggerimenti di sintassi in 0.2) |
 | 1 | Esperimento: Tessera contro Python con un modello linguistico | pronto; prime corse locali in corso ([experiment/](experiment/)) |
 | 2 | Nucleo: tipi statici, compilatore WebAssembly completo, capability di rete | da fare |
 | 3 | Addestramento di IA: tensori, derivazione, provenienza dei dati | da fare |
@@ -67,7 +67,7 @@ python -m tessera esegui examples/checkout.tsr
 | `python -m tessera prova file.tsr` | esegue le clausole `example` come test |
 | `python -m tessera compila file.tsr -o build` | produce `.wat` e `.wasm` |
 | `python -m tessera chiama file.tsr funzione arg... [--wasm]` | chiama una funzione, interpretata o compilata |
-| `python -m pytest tests` | 52 test, compresa la prova differenziale interprete contro WebAssembly |
+| `python -m pytest tests` | 61 test, compresa la prova differenziale interprete contro WebAssembly |
 
 Cosa controlla già il prototipo: effetti dichiarati, contratti, tipi ai confini delle funzioni, `edit` e `take`, overflow, divisione per zero, permessi sui file del `process`, `Secret` mai stampati, `Result` mai ignorati, `match` esaustivi, requisiti di piattaforma. Le regole sono in [spec/semantics.md](spec/semantics.md).
 

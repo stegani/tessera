@@ -42,12 +42,12 @@ The full design is in the paper (in Italian): [docs/paper.md](docs/paper.md).
 
 ## Status
 
-**Prototype 0.1.** A complete interpreter for the language core, static checks, and a WebAssembly compiler for pure numeric functions. It is written in Python to reach the phase 1 experiment quickly; the final compiler will be rewritten once the language is stable.
+**Prototype 0.2.** A complete interpreter for the language core, static checks, and a WebAssembly compiler for pure numeric functions. It is written in Python to reach the phase 1 experiment quickly; the final compiler will be rewritten once the language is stable.
 
 | Phase | What | Status |
 |---|---|---|
 | 0 | Paper and syntax | done |
-| 1 | Interpreter, static checks, first WebAssembly compiler | done (0.1) |
+| 1 | Interpreter, static checks, first WebAssembly compiler | done (0.1, syntax hints in 0.2) |
 | 1 | Experiment: Tessera vs Python written by a language model | ready; first local runs in progress ([experiment/](experiment/)) |
 | 2 | Core: static types, full WebAssembly compiler, network capabilities | to do |
 | 3 | AI training: tensors, differentiation, data provenance | to do |
@@ -75,7 +75,7 @@ python -m tessera run examples/checkout.tsr
 | `python -m tessera test file.tsr` | runs the `example` clauses as tests |
 | `python -m tessera build file.tsr -o build` | produces `.wat` and `.wasm` |
 | `python -m tessera call file.tsr function arg... [--wasm]` | calls a function, interpreted or compiled |
-| `python -m pytest tests` | 52 tests, including differential testing of the interpreter against WebAssembly |
+| `python -m pytest tests` | 61 tests, including differential testing of the interpreter against WebAssembly |
 
 The prototype already enforces: declared effects, contracts, types at function boundaries, `edit` and `take`, integer overflow, division by zero, file permissions granted by the `process`, `Secret` values never printed, `Result` values never ignored, exhaustive `match`, platform requirements. Messages and documentation are currently in Italian; the rules are in [spec/semantics.md](spec/semantics.md).
 

@@ -187,7 +187,6 @@ arg: [NAME ":"] [MODE] expr
 ?atom: literal
      | NAME                              -> var
      | TYPE_NAME                         -> type_ref
-     | "result"                          -> result_ref
      | "(" expr ")"
      | "(" expr ("," expr)+ ")"          -> tuple
      | "[" _NL? (expr ("," _NL? expr)* ","? _NL?)? "]" -> list

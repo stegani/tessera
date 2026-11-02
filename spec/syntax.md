@@ -1,4 +1,4 @@
-# Sintassi di Tessera — bozza 0.1
+# Sintassi di Tessera — bozza 0.2
 
 Bozza del 01/11/2026. La grammatica formale è [tessera.lark](tessera.lark) (LALR(1), verificata senza conflitti); gli esempi sono in [examples/](../examples/); la verifica si lancia con:
 
@@ -33,8 +33,10 @@ Ogni scelta deve rispondere a una domanda: **riduce gli errori di un modello, o 
 | 16 | Codice solo ASCII (le stringhe possono contenere altro) | `implies`, non `⇒` | I simboli rari costano più token e si sbagliano di più (misure sotto) |
 | 17 | Stringhe con interpolazione sempre attiva | `"Rimborso di {amount} avviato"` | Un solo modo; interpolare un `Secret` è un errore di compilazione |
 | 18 | Quantità con unità nel lessico | `memory 512MB`, `data.len() < 4GB` | Budget e limiti leggibili senza costanti magiche |
-| 20 | Tipo tupla tra parentesi (aggiunto con il prototipo, grammatica 0.2) | `fn split_once(...) -> (Str, Str)` | Serviva per restituire più valori senza definire una struttura |
 | 19 | Un processo dichiara la piattaforma che gli serve | `platform: ecc, microcode_current, spectre_mitigations` | La sentinella hardware non lo avvia su una macchina che non la garantisce (paper, sezione 7.5) |
+| 20 | Tipo tupla tra parentesi (aggiunto con il prototipo, grammatica 0.2) | `fn split_once(...) -> (Str, Str)` | Serviva per restituire più valori senza definire una struttura |
+| 21 | `result` non è una parola riservata: dentro `ensures` indica il valore restituito, altrove è un nome come gli altri (02/11/2026) | `var result = 0` | Prima, nelle espressioni, `result` veniva preso in silenzio per il valore restituito: una trappola |
+| 22 | Gli errori di sintassi sono in inglese e hanno un suggerimento preciso per le abitudini prese da altri linguaggi (02/11/2026) | `let mut x` → "use `var`" | Costruiti sugli errori reali dei modelli locali; le regole sono in `tessera/hints.py` |
 
 **Assenti di proposito**: classi ed ereditarietà, eccezioni, `null`, macro, `eval`, variabili globali modificabili, `import *`, `++` e `--`, operatore ternario, sovraccarico degli operatori (`@` esiste solo per le matrici).
 

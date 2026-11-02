@@ -1,6 +1,7 @@
 # Copyright 2026 Stefano Stegani
 # SPDX-License-Identifier: Apache-2.0
 """Il ciclo dell'esperimento: richiesta, esecuzione sui test visibili, correzione, test nascosti."""
+import hashlib
 import json
 import time
 from pathlib import Path
@@ -49,7 +50,8 @@ def esegui_compito(modello, task, lingua, max_tentativi, ripetizione):
 
     return {
         "task": task["id"], "lang": lingua, "rep": ripetizione, "security": task.get("security", False),
-        "model": modello.modello, "solved_at": risolto_al, "attempts": tentativi, "hidden": nascosti,
+        "model": modello.modello, "prompt_version": hashlib.sha1(sistema.encode("utf-8")).hexdigest()[:8],
+        "solved_at": risolto_al, "attempts": tentativi, "hidden": nascosti,
         "final_code": codice_finale,
     }
 

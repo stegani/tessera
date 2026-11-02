@@ -310,3 +310,39 @@ def test_esperimento_codice_che_stampa():
     codice = 'print("debug")\ndef word_count(text):\n    print(text)\n    return len([p for p in text.split(" ") if p])\n'
     esito = sandbox.esegui("python", codice, task, task["visible"])
     assert [r["outcome"] for r in esito["results"]] == ["pass", "pass"]
+
+
+# ---------- suggerimenti per gli errori tipici dei modelli (02/11/2026) ----------
+
+ERRORI_TIPICI = [
+    ("let mut x = 0", "var name = value"),
+    ("if x > 0 then", "if condition do"),
+    ("let m = i64::MAX", "no `::` paths"),
+    ("for i in 1..=n do", "`1..n + 1`"),
+    ("if a && b do", "`and`, `or`, `not`"),
+    ("let y = x;", "No semicolons"),
+    ("else do", "`else` alone"),
+]
+
+
+@pytest.mark.parametrize("riga, frammento", ERRORI_TIPICI)
+def test_suggerimento_per_errore_tipico(riga, frammento):
+    from tessera.parser import analizza
+    sorgente = f"module prova\n\nfn f(x: i64, n: i64, a: bool, b: bool) -> i64\n  effects: none\ndo\n  {riga}\n  return x\nend fn f\n"
+    with pytest.raises(ErroreTessera) as info:
+        analizza(sorgente)
+    assert info.value.suggerimento and frammento in info.value.suggerimento, info.value.suggerimento
+
+
+def test_suggerimento_do_sulla_riga_della_firma():
+    from tessera.parser import analizza
+    with pytest.raises(ErroreTessera) as info:
+        analizza("module prova\n\npub fn f(x: i64) -> i64 do\n  return x\nend fn f\n")
+    assert "effects: none" in info.value.suggerimento
+
+
+def test_result_e_un_nome_libero(tmp_path):
+    sorgente = main("print(conta(\"abc\"))") + (
+        "\nfn conta(text: Str) -> i64\n  effects: none\n  ensures: result >= 0\ndo\n  var result = 0\n"
+        "  for c in text.chars() do\n    result += 1\n  end for\n  return result\nend fn conta\n")
+    assert esegui(tmp_path, sorgente) == ["3"]

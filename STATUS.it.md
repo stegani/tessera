@@ -1,6 +1,6 @@
 # Tessera — stato del progetto
 
-*[English](STATUS.md) · Italiano* · ultimo aggiornamento: 1 novembre 2026
+*[English](STATUS.md) · Italiano* · ultimo aggiornamento: 2 novembre 2026
 
 ## A che punto siamo
 
@@ -8,10 +8,10 @@
 |---|---|
 | Paper di progetto | fatto, 16 sezioni ([docs/paper.md](docs/paper.md)) |
 | Sintassi e grammatica formale | fatte, LALR(1) senza conflitti ([spec/syntax.md](spec/syntax.md), [spec/tessera.lark](spec/tessera.lark)) |
-| Interprete e controlli statici | prototipo 0.1: nucleo completo, effetti, contratti, `edit`/`take`, permessi sui file, sentinella hardware |
-| Compilatore WebAssembly | prototipo 0.1: funzioni pure su `i32`, `i64`, `f64`, `bool`, confrontato con l'interprete su 1 500 chiamate casuali |
+| Interprete e controlli statici | prototipo 0.2: nucleo completo, effetti, contratti, `edit`/`take`, permessi sui file, sentinella hardware |
+| Compilatore WebAssembly | prototipo 0.2: funzioni pure su `i32`, `i64`, `f64`, `bool`, confrontato con l'interprete su 1 500 chiamate casuali |
 | Esperimento della fase 1 | pronto; primi risultati con modelli locali (vedi sotto) ([experiment/](experiment/)) |
-| Test | 52, tutti superati |
+| Test | 61, tutti superati |
 | Pubblicazione | repository pubblica, Apache 2.0, DOI [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820) |
 
 ## Direzione: un linguaggio per le IA locali
@@ -37,42 +37,33 @@ I dettagli sono nella sezione 11 del paper.
 | Repository | pubblica; nomi dei file e README in inglese; contenuto del codice e specifiche in italiano |
 | Esperimento | lo stesso modello scrive 20 esercizi in Tessera e in Python; i test nascosti sui casi limite separano i difetti *silenziosi* (risultati sbagliati) da quelli che fermano il programma; gira prima di tutto con modelli locali (Ollama, LM Studio); i modelli commerciali come Claude o quelli di OpenAI sono facoltativi |
 
-## Esperimento: primi risultati (1 novembre 2026)
+## Esperimento: risultati finora (1-2 novembre 2026)
 
-Solo modelli locali, tramite Ollama. **gemma3:4b**: corsa completa, 20 esercizi × 3 ripetizioni per linguaggio. **qwen2.5:3b**: parziale, 39 risultati su 120. **qwen3.8**: per ora un solo esercizio.
+Solo modelli locali, tramite Ollama, 20 esercizi × 3 ripetizioni per linguaggio. "v1" è la versione 0.1.0 (1° novembre); "v2" è la versione 0.2.0, che aggiunge errori di sintassi con suggerimenti precisi, `result` non più riservato e un manuale più corto (circa 1 060 token invece di 1 700) con una tabella "sbagliato → giusto" costruita sugli errori reali dei modelli.
 
-| Modello | Linguaggio | Risolti entro 3 tentativi | Test nascosti superati (esercizi risolti) | Difetti silenziosi |
-|---|---|---|---|---|
-| gemma3:4b | Tessera | 1 / 60 | 5 / 5 | 0 |
-| gemma3:4b | Python | 44 / 60 | 222 / 252 | **30** (20 negli esercizi di sicurezza) |
-| qwen2.5:3b (parziale) | Tessera | 0 / 20 | – | 0 |
-| qwen2.5:3b (parziale) | Python | 14 / 19 | – | **13** |
-| qwen3.8 (1 esercizio) | Tessera | 1 / 1, al 2° tentativo | 10 / 10 | 0 |
-| qwen3.8 (1 esercizio) | Python | 1 / 1 | 10 / 10 | 0 |
+| Modello | Versione | Tessera risolti | Python risolti | Difetti silenziosi in Python | Tentativi Tessera con errore di sintassi |
+|---|---|---|---|---|---|
+| gemma3:4b | v1 | 1 / 60 | 44 / 60 | **30** | 135 / 180 |
+| gemma3:4b | v2 | 0 / 60 | 43 / 60 | **29** | 169 / 180 |
+| qwen2.5:3b | v1 | 0 / 60 | 44 / 60 | **37** | 180 / 180 |
+| qwen2.5:3b | v2 | 0 / 60 | 48 / 60 | **30** | 178 / 180 |
+| qwen3.8 (1 solo esercizio) | v1 | 1 / 1, al 2° tentativo | 1 / 1 | 0 | 1 / 2 |
+
+*Difetti silenziosi*: test nascosti in cui il programma ha restituito un risultato sbagliato senza nessun errore.
 
 **Cosa dicono, onestamente:**
 
-- Con il solo manuale nel prompt, **i modelli molto piccoli (3-4 miliardi) non riescono quasi mai a scrivere Tessera**. In Python risolvono la maggior parte degli esercizi, ma lasciano molti difetti *silenziosi*: risultati sbagliati senza nessun errore, soprattutto negli esercizi di sicurezza. È proprio il problema che Tessera vuole risolvere, a patto che il modello riesca a scriverlo.
-- Un modello locale più grande (qwen3.8, 27 miliardi) ha scritto Tessera corretto dopo un solo errore del compilatore.
-- Gli errori in Tessera non sono casuali. Nascono da **abitudini prese da altri linguaggi**:
+- **I modelli molto piccoli (3-4 miliardi) non imparano Tessera da un manuale nel prompt**, nemmeno migliorato. Un modello locale più grande (qwen3.8, 27 miliardi) ha scritto Tessera corretto dopo un solo errore del compilatore.
+- **Gli interventi mirati funzionano sull'abitudine che colpiscono**: `let mut` (da Rust) è passato da 34 e 68 casi a 0 e 1; `then`, `::` e le chiusure `|x|` sono calati molto. Ma ogni programma contiene diverse abitudini *diverse* (`!x`, `.unwrap()`, `as i64`, metodi inventati), il parser si ferma al primo errore, e tre tentativi non bastano a superarle tutte.
+- Alcune regole un modello da 3 miliardi non le assorbe affatto: qwen2.5:3b ha omesso `effects:` in 122 tentativi su 180, nonostante manuale, tabella e suggerimenti.
+- In Python i modelli piccoli risolvono la maggior parte degli esercizi, ma lasciano **30-37 difetti silenziosi** per corsa, soprattutto negli esercizi di sicurezza: proprio il problema che Tessera vuole risolvere.
+- **Rumore**: il prompt di Python non è cambiato tra v1 e v2, eppure qwen2.5:3b è passato da 44 a 48 esercizi risolti. Differenze di pochi esercizi sono variazione casuale, non un effetto.
+- **Correzione**: i 9 errori attribuiti il 1° novembre alla parola riservata `result` erano in realtà tutti `let mut result`. Liberare `result` resta giusto: nelle espressioni veniva interpretato in silenzio come il valore restituito.
 
-  | Errore | Quante volte (gemma3:4b) |
-  |---|---|
-  | `do` sulla riga della firma, saltando `effects:` | 35 |
-  | `let mut` invece di `var` (Rust) | 34 tentativi |
-  | `i64::MAX`, chiusure `\|c\|`, intervalli `1..=n` (Rust) | 44 |
-  | `if ... then` invece di `if ... do` | 17 |
-  | `&&` / `\|\|` invece di `and` / `or` | 14 tentativi |
-  | `result` usato come nome di variabile, ma è riservato | 9 |
+## Prossimi passi
 
-- Il banco di prova ha scoperto da solo un bug reale: il codice generato che stampa rompeva la lettura dei risultati. Corretto e coperto da un test.
-
-## Prossimi passi (dal 2 novembre 2026)
-
-1. **Errori che dicono esattamente cosa scrivere**: per esempio "scrivi `effects: none` su una riga, poi `do`" oppure "usa `var` invece di `let mut`", in inglese. Oggi il parser dice solo "atteso uno tra: do".
-2. **Togliere le trappole inutili**: `result` riservato solo dentro `ensures`; riconoscere forme diffuse come `1..=n`, `let mut`, `then`, `&&` per dare il suggerimento giusto.
-3. **Manuale "tascabile"** (circa 700 token) con una sezione "non così, ma così" costruita sugli errori reali qui sopra.
-4. Riprendere qwen2.5:3b (riparte dai risultati salvati), poi ripetere i modelli piccoli con i miglioramenti per misurare il guadagno.
-5. Lanciare qwen3.8 di notte (circa 7 ore).
-6. Generazione vincolata dalla grammatica tramite llama.cpp; dati di addestramento verificati dal compilatore per un adattamento LoRA.
-7. Controllo statico dei tipi e compilatore WebAssembly più completo.
+1. **Segnalare tutti gli errori di sintassi insieme**, non solo il primo, così un modello piccolo può correggere più abitudini a ogni tentativo.
+2. **Generazione vincolata dalla grammatica** (llama.cpp): renderebbe impossibili questi errori di sintassi, e per i modelli da 3-4 miliardi è probabilmente indispensabile.
+3. Lanciare **qwen3.8** di notte sulla v2 (circa 7 ore): la misura decisiva su un modello abbastanza grande da scrivere Tessera.
+4. Dati di addestramento generati e verificati dal compilatore, per un adattamento LoRA di un modello piccolo.
+5. Messaggi in inglese anche per gli altri errori (tipi, effetti, contratti); controllo statico dei tipi; compilatore WebAssembly più completo.

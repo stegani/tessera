@@ -1,153 +1,75 @@
-# Tessera language reference (prototype 0.1)
+# Tessera reference (prototype 0.1)
 
-Tessera is a statically structured, explicit programming language. Everything a function can do is declared in its signature, and whatever is not declared is rejected. This reference describes exactly what the current prototype supports: do not use anything that is not described here.
+Tessera looks a little like Rust and Python, but it is **neither**: follow this page exactly, and do not use anything it does not describe.
 
-## File structure
+## A complete example
 
 ```
 module solution
 
-pub type Shape do
-  case Circle(radius: f64)
-  case Square(side: f64)
-end type Shape
-
-pub fn area(shape: Shape) -> f64
-  effects: none
-  example: area(Square(side: 2.0)) == 4.0
-do
-  match shape do
-    case Circle(r):
-      return 3.14159 * r * r
-    case Square(s):
-      return s * s
-  end match
-end fn area
-```
-
-- The first line is `module <name>`. Comments start with `--`.
-- Statements end at the end of the line. There are no semicolons and no braces.
-- Blocks open with `do` and close with `end` plus the keyword that opened them: `end if`, `end for`, `end while`, `end match`, `end fn <name>`, `end type <Name>`.
-- Indentation is not significant, but use two spaces per level.
-- Type names are PascalCase (`ParseError`); everything else is snake_case (`parse_int`, `total`).
-
-## Functions
-
-```
-pub fn name(a: i64, b: Str) -> Result[i64, MyError]
-  doc: "Optional one-line description."
-  effects: none
-  requires: a >= 0
-  ensures: result is Ok(v) implies v >= 0
-  example: name(1, "x") == Ok(1)
-do
-  ...
-end fn name
-```
-
-- Clauses come in this exact order: `doc` (optional), `effects` (mandatory), `requires`, `ensures`, `example` (each optional, repeatable).
-- `effects: none` declares a pure function. A function that prints needs `effects: console`.
-- `requires` is checked when the function is called, `ensures` when it returns (`result` is the returned value). A violation stops the program.
-- `pub` makes the function visible outside the module. Omit `-> Type` for functions that return nothing.
-- `return` is always explicit; a function with a return type must end every path with `return`.
-- Parameters are read-only. `edit p: T` lets the function modify the caller's variable (call it as `f(edit x)`); `take p: T` consumes it (`f(take x)`).
-- Anonymous functions: `fn(x) => x * 2`.
-
-## Types
-
-| Type | Values |
-|---|---|
-| `i64`, `i32` | integers (`42`, `-7`, `1_000`) |
-| `f64` | decimals (`2.5`, `0.0`); always write the decimal point |
-| `bool` | `true`, `false` |
-| `Str` | `"text"`; a single character is a `Str` of length 1 |
-| `List[T]` | `[1, 2, 3]`; an empty list needs a typed variable: `var out: List[i64] = []` |
-| `(A, B)` | tuples: `(1, "a")`, unpacked with `let (x, y) = pair` |
-| `Option[T]` | `Some(x)` or `None` |
-| `Result[T, E]` | `Ok(x)` or `Err(e)` |
-
-User types:
-
-```
-pub type Point do          -- struct
-  x: f64
-  y: f64
-end type Point
-
-pub type ParseError do     -- sum type: one `case` per variant
+pub type ParseError do
   case Empty
-  case TooLong(limit: i64)
+  case Invalid
 end type ParseError
 
-pub type Cents = i64       -- a distinct type wrapping i64: Cents(1250)
+pub fn first_digit(text: Str) -> Result[i64, ParseError]
+  effects: none
+do
+  if text.is_empty() do
+    return Err(ParseError.Empty)
+  end if
+  var position = 0
+  for c in text.chars() do
+    if c.is_digits() do
+      return Ok(position)
+    end if
+    position += 1
+  end for
+  return Err(ParseError.Invalid)
+end fn first_digit
 ```
 
-- Construct with `Point(x: 1.0, y: 2.0)`, `ParseError.Empty`, `ParseError.TooLong(limit: 5)`. Variants can also be written without the type name: `Empty`.
-- Read fields with `p.x`.
+## Common mistakes (wrong → right)
 
-## Statements
+| Wrong | Right |
+|---|---|
+| `fn f(x: i64) -> i64 do` or `{` | signature, then `effects: none` on its own line, then `do` on its own line |
+| `let mut x = 0` | `var x = 0` (`let` is for values that never change) |
+| `if x > 0 then` / `if x > 0:` / `if x > 0 {` | `if x > 0 do` … `end if` |
+| `else do` / `elif` | `else` alone on its line / `else if x > 0 do` |
+| `end` alone, or blocks closed out of order | `end if`, `end for`, `end while`, `end match`, `end fn name`, innermost first |
+| `let y = if a then b else c` | `var y = c` then `if a do` / `y = b` / `end if` |
+| `&&`, `\|\|`, `!x` | `and`, `or`, `not x` |
+| `a and b or c` | `(a and b) or c` |
+| `0 <= x < n` | `0 <= x and x < n` |
+| `i64::MAX` | `9223372036854775807` |
+| `1..=n` | `1..n + 1` (ranges exclude the end) |
+| `\|x\| x * 2` | `fn(x) => x * 2` |
+| `x++`, `;` at line end | `x += 1`, nothing at line end |
+| `"a" + "b"` | `"{a}{b}"` or `parts.join("")` |
+| `'c'` | `"c"` (a character is a one-letter `Str`) |
+| `str`, `int`, `Vec<i64>`, `String` | `Str`, `i64`, `List[i64]` |
+| `case Ok(n) => ...` | `case Ok(n):` then the statements on the next lines |
+| `x.len` / `len(x)` | `x.len()` |
+| `1 + 2.0` | `1.to_f64() + 2.0` (integers and decimals never mix) |
 
-```
-let x = 10                 -- immutable
-var total = 0              -- mutable
-total += x                 -- also -=, *=, /=
-if x > 5 do
-  ...
-else if x > 2 do
-  ...
-else
-  ...
-end if
-for i in 0..n do           -- i = 0, 1, ..., n - 1
-  ...
-end for
-for item in items do       -- also iterates the characters of a Str
-  ...
-end for
-while i < n do
-  ...
-end while
-match value do
-  case Ok(n) if n > 0:
-    ...
-  case Ok(n):
-    ...
-  case Err(_):
-    ...
-end match
-```
+## Rules
 
-- `break` and `continue` work in loops.
-- In `match`, each `case pattern:` is followed by its statements on the next lines. Patterns: a name (binds the value), `_`, a literal (`"I"`, `3`), a variant with sub-patterns (`Some(x)`, `Err(ParseError.Empty)`), a tuple. A match must cover every variant or end with `case _:`.
-- `value is Pattern` tests a pattern in an expression: `if r is Ok(v) do ... end if`.
-
-## Expressions and rules
-
-- Arithmetic: `+ - * / %`. Integers and decimals never mix: convert with `x.to_f64()` or `f.to_int()`.
-- Integer `/` truncates toward zero (`-7 / 2` is `-3`); `%` has the sign of the dividend (`-7 % 2` is `-1`).
-- Integer overflow and division by zero are runtime errors: they stop the program.
-- Comparisons: `== != < <= > >=`, and `in` (`x in list`, `"ab" in text`, `i in 0..10`). Only one comparison per expression: write `0 <= x and x < n`, never `0 <= x < n`.
-- Logic: `and`, `or`, `not`, `implies`. `and` and `or` cannot be mixed without parentheses: `(a and b) or c`.
-- Strings: double quotes only. Escapes: `\"`, `\\`, `\n`, `\t`, `\{`, `\}`. Interpolation: `"total: {x + 1}"`. Strings cannot be joined with `+`: use interpolation or `join`.
-- `expr?` on a `Result` returns the `Err` from the current function (which must return a `Result`); on an `Option` returns `None`.
-- A `Result` must never be ignored: handle it with `?`, `match` or `unwrap_or`.
-- Indexing `list[i]` stops the program if `i` is out of range; `list.get(i)` returns an `Option`.
-- Values are copied on assignment: changing a copy never changes the original.
-
-## Built-in functions
-
-`min(a, b)`, `max(a, b)`, `abs(x)`, `from_code(n)` (character with Unicode code `n`), `print(x)` (needs `effects: console`). Nothing needs to be imported.
+- First line `module solution`. Comments start with `--`. One statement per line.
+- Functions: `pub fn name(a: T) -> R`, then the clauses each on its own line, in this order: `effects: none` (mandatory), optional `requires: cond`, `ensures: cond` (`result` is the returned value there). Then `do`, the body, `end fn name`. Every path must `return`.
+- Variables: `let x = 1` (fixed), `var y = 0` (changeable), `y += 1`. An empty list needs its type: `var out: List[i64] = []`.
+- Control: `if c do … else if d do … else … end if`, `for i in 0..n do … end for`, `for x in items do … end for`, `while c do … end while`, `break`, `continue`.
+- `match v do` / `case Some(x):` / `case None:` / `case _:` / `end match`; the statements of each case go on the following lines.
+- Types: `i64`, `i32`, `f64` (write `2.0`), `bool`, `Str`, `List[T]`, `Option[T]` (`Some(x)`, `None`), `Result[T, E]` (`Ok(x)`, `Err(e)`), tuples `(A, B)`.
+- Sum types: `pub type E do` / `case A` / `case B(field: i64)` / `end type E`; build with `E.A`, `E.B(field: 1)`.
+- Integer `/` truncates toward zero, `%` keeps the dividend's sign. Overflow and division by zero stop the program.
+- Strings: double quotes, escapes `\"` `\\` `\n` `\t` `\{` `\}`, interpolation `"{x}"`.
+- `r?` returns the error early from a function that returns `Result`. Never ignore a `Result`.
+- Built-ins: `min(a, b)`, `max(a, b)`, `abs(x)`, `from_code(n)`.
 
 ## Methods
 
-| On | Methods |
-|---|---|
-| `Str` | `len()`, `is_empty()`, `upper()`, `lower()`, `trim()`, `contains(s)`, `starts_with(s)`, `ends_with(s)`, `replace(old, new)`, `split(sep)` -> `List[Str]`, `split_once(sep)` -> `(Str, Str)` (second part empty if `sep` is absent), `chars()` -> `List[Str]`, `slice(start, end)` (characters `start` to `end - 1`), `code()` (Unicode code of a one-character `Str`), `is_digits()` (non-empty and only ASCII `0`-`9`), `to_int()` -> `Result[i64, Str]` (trims spaces, accepts a sign), `to_float()` -> `Result[f64, Str]`, `to_str()` |
-| `List` | `len()`, `is_empty()`, `get(i)` -> `Option`, `first()`, `last()`, `contains(x)`, `map(f)`, `filter(f)`, `sum()`, `reversed()`, `sorted()`, `slice(start, end)`, `join(sep)` (list of `Str`), `to_str()`; on `var` lists only: `push(x)`, `pop()` -> `Option`, `clear()` |
-| integers | `to_f64()`, `to_str()`, `abs()` |
-| `f64` | `to_int()`, `to_str()`, `abs()`, `floor()`, `round()`, `sqrt()` |
-| `Option`, `Result` | `is_some()`, `is_none()`, `is_ok()`, `is_err()`, `unwrap_or(default)` |
-
-## Not available
-
-No classes, inheritance, exceptions, `null`, dictionaries or sets, `unwrap()`, `elif`, ternary operator, `++`, braces, semicolons, single-quoted strings, string concatenation with `+`, implicit return, chained comparisons, or imports of standard modules.
+- `Str`: `len()`, `is_empty()`, `upper()`, `lower()`, `trim()`, `contains(s)`, `starts_with(s)`, `ends_with(s)`, `replace(a, b)`, `split(sep)`, `chars()`, `slice(start, end)`, `code()`, `is_digits()` (non-empty, ASCII 0-9 only), `to_int()` → `Result[i64, Str]`, `to_str()`.
+- `List`: `len()`, `is_empty()`, `get(i)` → `Option`, `first()`, `last()`, `contains(x)`, `map(f)`, `filter(f)`, `sum()`, `reversed()`, `sorted()`, `slice(start, end)`, `join(sep)`; on a `var` list: `push(x)`, `pop()`.
+- Numbers: `to_f64()`, `to_int()`, `to_str()`, `abs()`. `Option`/`Result`: `is_some()`, `is_none()`, `is_ok()`, `is_err()`, `unwrap_or(d)`.
+- Indexing `list[i]` stops the program if `i` is out of range.
