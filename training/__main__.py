@@ -25,19 +25,15 @@ from . import dataset, solve, tasks
 QUI = Path(__file__).resolve().parent
 DATI = QUI / "data"
 INSEGNANTE_PREDEFINITO = "ollama:qwen3.8"
-# Un modello grande su una scheda da 8 GB gira in parte sul processore: una risposta lunga puo' superare
-# la mezz'ora, soprattutto se Ollama serve anche un altro lavoro nello stesso momento.
-LIMITE_SECONDI = 3600
 
 
 def insegnante(args):
     """Il modello che scrive esercizi e soluzioni: locale per scelta; i servizi a pagamento chiedono --yes."""
     prefisso, _, nome = args.teacher.partition(":")
     if prefisso == "ollama":
-        return ModelloOllama(nome, indirizzo=args.base_url or "http://localhost:11434", limite_secondi=LIMITE_SECONDI)
+        return ModelloOllama(nome, indirizzo=args.base_url or "http://localhost:11434")
     if prefisso == "lmstudio":
-        return ModelloCompatibileOpenAI(nome, indirizzo=args.base_url or "http://localhost:1234/v1",
-                                        limite_secondi=LIMITE_SECONDI)
+        return ModelloCompatibileOpenAI(nome, indirizzo=args.base_url or "http://localhost:1234/v1")
     if prefisso == "compat":
         if not args.base_url:
             sys.exit("con compat: serve --base-url")

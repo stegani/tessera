@@ -80,11 +80,12 @@ class ModelloClaude:
 class ModelloOllama:
     """Un modello locale servito da Ollama (http://localhost:11434), senza costi e senza account."""
 
-    def __init__(self, nome, indirizzo="http://localhost:11434", contesto=16384, limite_secondi=1800):
+    def __init__(self, nome, indirizzo="http://localhost:11434", contesto=16384, limite_secondi=3600):
         self.nome = nome
         self.modello = f"ollama:{nome}"
         self.indirizzo = indirizzo.rstrip("/")
         # Il contesto predefinito di Ollama e' corto: il manuale di Tessera piu' i tentativi verrebbero troncati.
+        # Il limite di un'ora serve ai modelli grandi che girano in parte sul processore.
         self.contesto = contesto
         self.limite_secondi = limite_secondi
 
@@ -114,7 +115,7 @@ class ModelloCompatibileOpenAI:
     """Un modello locale dietro un'interfaccia compatibile con OpenAI (/v1/chat/completions):
     LM Studio (predefinito http://localhost:1234/v1), ma anche Ollama, llama.cpp server, vLLM."""
 
-    def __init__(self, nome, indirizzo="http://localhost:1234/v1", limite_secondi=1800, prefisso="lmstudio", chiave=None):
+    def __init__(self, nome, indirizzo="http://localhost:1234/v1", limite_secondi=3600, prefisso="lmstudio", chiave=None):
         self.nome = nome
         self.modello = f"{prefisso}:{nome}"
         self.indirizzo = indirizzo.rstrip("/")
