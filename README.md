@@ -99,7 +99,7 @@ Tessera is an original idea by **Stefano Stegani**, who wrote its design, gramma
 
 To cite the project:
 
-> Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA* (Tessera: written by AI, hardened against AI), 2026. DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820)
+> Stefano Stegani, *Tessera: written by AI, hardened against AI*, 2026. DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820)
 
 The DOI always points to the latest version; version 0.1.0 has its own DOI, [10.5281/zenodo.23855821](https://doi.org/10.5281/zenodo.23855821), archived on Zenodo.
 
