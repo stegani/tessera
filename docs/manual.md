@@ -187,6 +187,8 @@ end fn evens
 
 ## 6. Control flow and logic
 
+`else` can also be written `else do`, to mirror `if ... do`; both are accepted.
+
 ```tessera
 module control
 
@@ -682,7 +684,7 @@ The paper describes more than the prototype implements. Not available in 0.2:
 | `fn f(x: i64) -> i64 {` | signature, then `effects: none` on its own line, then `do` |
 | `let mut x = 0` | `var x = 0` |
 | `if x > 0 then` / `if x > 0:` | `if x > 0 do` … `end if` |
-| `elif` / `else do` | `else if x > 0 do` / `else` alone |
+| `elif` | `else if x > 0 do` |
 | `end` alone | `end if`, `end for`, `end while`, `end match`, `end fn name` |
 | `&&`, `\|\|`, `!x` | `and`, `or`, `not x` |
 | `0 <= x < n` | `0 <= x and x < n` |

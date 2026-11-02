@@ -37,6 +37,7 @@ Ogni scelta deve rispondere a una domanda: **riduce gli errori di un modello, o 
 | 20 | Tipo tupla tra parentesi (aggiunto con il prototipo, grammatica 0.2) | `fn split_once(...) -> (Str, Str)` | Serviva per restituire più valori senza definire una struttura |
 | 21 | `result` non è una parola riservata: dentro `ensures` indica il valore restituito, altrove è un nome come gli altri (02/11/2026) | `var result = 0` | Prima, nelle espressioni, `result` veniva preso in silenzio per il valore restituito: una trappola |
 | 22 | Gli errori di sintassi sono in inglese e hanno un suggerimento preciso per le abitudini prese da altri linguaggi (02/11/2026) | `let mut x` → "use `var`" | Costruiti sugli errori reali dei modelli locali; le regole sono in `tessera/hints.py` |
+| 23 | `else do` è accettato come alternativa a `else` (02/11/2026) | `else do` / `else` | Era l'unico errore di qwen3.8 sui 20 esercizi (3 volte su 23 tentativi): è lo specchio naturale di `if … do` e non crea ambiguità |
 
 **Assenti di proposito**: classi ed ereditarietà, eccezioni, `null`, macro, `eval`, variabili globali modificabili, `import *`, `++` e `--`, operatore ternario, sovraccarico degli operatori (`@` esiste solo per le matrici).
 

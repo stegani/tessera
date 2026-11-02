@@ -36,7 +36,7 @@ end fn first_digit
 | `fn f(x: i64) -> i64 do` or `{` | signature, then `effects: none` on its own line, then `do` on its own line |
 | `let mut x = 0` | `var x = 0` (`let` is for values that never change) |
 | `if x > 0 then` / `if x > 0:` / `if x > 0 {` | `if x > 0 do` … `end if` |
-| `else do` / `elif` | `else` alone on its line / `else if x > 0 do` |
+| `elif` | `else if x > 0 do` (`else` alone or `else do`) |
 | `end` alone, or blocks closed out of order | `end if`, `end for`, `end while`, `end match`, `end fn name`, innermost first |
 | `let y = if a then b else c` | `var y = c` then `if a do` / `y = b` / `end if` |
 | `&&`, `\|\|`, `!x` | `and`, `or`, `not x` |

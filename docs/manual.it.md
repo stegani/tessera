@@ -189,6 +189,8 @@ end fn evens
 
 ## 6. Controllo del flusso e logica
 
+`else` si può scrivere anche `else do`, come specchio di `if ... do`: sono accettati entrambi.
+
 ```tessera
 module control
 
@@ -684,7 +686,7 @@ I blocchi `unsafe` esistono solo nei moduli con `profile: kernel`.
 | `fn f(x: i64) -> i64 {` | firma, poi `effects: none` su una riga propria, poi `do` |
 | `let mut x = 0` | `var x = 0` |
 | `if x > 0 then` / `if x > 0:` | `if x > 0 do` … `end if` |
-| `elif` / `else do` | `else if x > 0 do` / `else` da solo |
+| `elif` | `else if x > 0 do` |
 | `end` da solo | `end if`, `end for`, `end while`, `end match`, `end fn nome` |
 | `&&`, `\|\|`, `!x` | `and`, `or`, `not x` |
 | `0 <= x < n` | `0 <= x and x < n` |

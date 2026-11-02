@@ -10,8 +10,6 @@ import re
 
 # (condizione sulla riga o sul simbolo trovato, suggerimento). La prima regola che corrisponde vince.
 REGOLE = [
-    (lambda riga, tok, attesi: re.search(r"^\s*else\s+do\s*$", riga),
-     "Write `else` alone on its line, without `do` (only `if` and `else if` take `do`)."),
     (lambda riga, tok, attesi: re.search(r"^\s*end\s+\w+", riga) and attesi and tok not in attesi,
      "Blocks must be closed in reverse order: the innermost open block is still waiting for its `end`. "
      "Close it first (for example `end if` before `end for`)."),

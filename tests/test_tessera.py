@@ -321,7 +321,6 @@ ERRORI_TIPICI = [
     ("for i in 1..=n do", "`1..n + 1`"),
     ("if a && b do", "`and`, `or`, `not`"),
     ("let y = x;", "No semicolons"),
-    ("else do", "`else` alone"),
 ]
 
 
@@ -332,6 +331,14 @@ def test_suggerimento_per_errore_tipico(riga, frammento):
     with pytest.raises(ErroreTessera) as info:
         analizza(sorgente)
     assert info.value.suggerimento and frammento in info.value.suggerimento, info.value.suggerimento
+
+
+def test_else_do_accettato():
+    """`else do` e' un'alternativa accettata a `else` (02/11/2026)."""
+    from tessera.parser import analizza
+    for ramo in ("else", "else do"):
+        analizza(f"module prova\n\nfn f(x: i64) -> i64\n  effects: none\ndo\n  if x > 0 do\n    return 1\n"
+                 f"  {ramo}\n    return 0\n  end if\nend fn f\n")
 
 
 def test_suggerimento_do_sulla_riga_della_firma():

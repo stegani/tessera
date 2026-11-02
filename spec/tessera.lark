@@ -122,7 +122,8 @@ ASSIGN_OP: "=" | "+=" | "-=" | "*=" | "/="
 
 if_stmt: "if" expr "do" block elif_part* [else_part] "end" "if" _NL
 elif_part: "else" "if" expr "do" block
-else_part: "else" block
+// `else do` e' accettato come alternativa: e' lo specchio naturale di `if ... do`.
+else_part: "else" "do"? block
 
 for_stmt: "for" pattern "in" expr "do" block "end" "for" _NL
 while_stmt: "while" expr "do" block "end" "while" _NL
