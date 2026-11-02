@@ -43,7 +43,7 @@ Details in section 11 of the paper.
 
 ## Experiment: results so far (1-2 November 2026)
 
-Local models only, via Ollama, 20 tasks × 3 repetitions per language. "v1" is version 0.1.0 (1 November); "v2" is version 0.2.0, which adds syntax errors with precise hints, `result` no longer reserved, and a shorter manual (about 1 060 tokens instead of 1 700) with a "wrong → right" table built on the models' real mistakes.
+Local models only, via Ollama, 20 tasks × 3 repetitions per language (qwen3.8: 1 repetition, about 2 minutes per task). "v1" is version 0.1.0 (1 November); "v2" is version 0.2.0, which adds syntax errors with precise hints, `result` no longer reserved, and a shorter manual (about 1 060 tokens instead of 1 700) with a "wrong → right" table built on the models' real mistakes.
 
 | Model | Version | Tessera solved | Python solved | Python silent defects | Tessera attempts with a syntax error |
 |---|---|---|---|---|---|
@@ -52,15 +52,17 @@ Local models only, via Ollama, 20 tasks × 3 repetitions per language. "v1" is v
 | qwen2.5:3b | v1 | 0 / 60 | 44 / 60 | **37** | 180 / 180 |
 | qwen2.5:3b | v2 | 0 / 60 | 48 / 60 | **30** | 178 / 180 |
 | qwen3.8 (1 task only) | v1 | 1 / 1, 2nd attempt | 1 / 1 | 0 | 1 / 2 |
+| qwen3.8 | v2 | **20 / 20** (17 at the 1st attempt) | 20 / 20 | 0 | 3 / 23 |
 
 *Silent defects*: hidden tests where the program returned a wrong result without any error.
 
 **What this says, honestly:**
 
-- **Very small models (3-4B) cannot learn Tessera from a manual in the prompt**, not even an improved one. A larger local model (qwen3.8, 27B) wrote correct Tessera after one compiler error.
+- **Very small models (3-4B) cannot learn Tessera from a manual in the prompt**, not even an improved one. A larger local model does: **qwen3.8 (27B) solved all 20 tasks in Tessera on v2**, 17 at the first attempt, with all 117 hidden tests passed. Its only 3 errors were the same one, `else do` instead of `else`, each fixed at once thanks to the hint.
 - **Targeted fixes work on the habit they target**: `let mut` (from Rust) went from 34 and 68 occurrences to 0 and 1; `then`, `::` and `|x|` closures dropped sharply. But each program contains several *different* habits (`!x`, `.unwrap()`, `as i64`, invented methods), the parser stops at the first error, and three attempts are not enough to get through them all.
 - Some rules a 3B model does not absorb at all: qwen2.5:3b left out `effects:` in 122 attempts out of 180 despite the manual, the table and the hints.
 - In Python the small models solve most tasks but leave **30-37 silent defects** per run, mostly in the security tasks: exactly the problem Tessera targets.
+- **With qwen3.8 the tasks no longer separate the languages**: Python too solved 20 of 20 at the first attempt with no silent defects. The 20 tasks are too easy for a 27B model; to see whether Tessera still protects, larger models need harder tasks. Tessera also costs more: about 2.3× the output tokens and, because of the manual in the prompt, about 10× the input tokens.
 - **Noise**: the Python prompt did not change between v1 and v2, yet qwen2.5:3b went from 44 to 48 solved tasks. Differences of a few tasks are random variation, not an effect.
 - **Correction**: the 9 errors attributed on 1 November to `result` being reserved were in fact all `let mut result`. Freeing `result` is still right: in expressions it was silently taken as the returned value.
 
@@ -68,6 +70,6 @@ Local models only, via Ollama, 20 tasks × 3 repetitions per language. "v1" is v
 
 1. **Report every syntax error at once** instead of only the first, so a small model can fix several habits per attempt.
 2. **Grammar-constrained generation** (llama.cpp): it would make these syntax errors impossible, and is likely essential for 3-4B models.
-3. Run **qwen3.8** overnight on v2 (about 7 hours): the decisive measurement on a model large enough to write Tessera.
+3. **Harder tasks** for models of 20B and up (qwen3.8 solved all 20 in both languages), and a decision on `else do`: the only mistake qwen3.8 made, the natural mirror of `if ... do`.
 4. **Training a small model (started)**: the pipeline is in [training/](training/). Next: generate about 300 new tasks and their solutions with qwen3.8 overnight, train gemma3:4b with QLoRA, and run the same experiment again to compare with the 0/60 "before".
 5. English messages for the remaining errors (types, effects, contracts); static type checker; fuller WebAssembly compiler.

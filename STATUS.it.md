@@ -43,7 +43,7 @@ I dettagli sono nella sezione 11 del paper.
 
 ## Esperimento: risultati finora (1-2 novembre 2026)
 
-Solo modelli locali, tramite Ollama, 20 esercizi × 3 ripetizioni per linguaggio. "v1" è la versione 0.1.0 (1° novembre); "v2" è la versione 0.2.0, che aggiunge errori di sintassi con suggerimenti precisi, `result` non più riservato e un manuale più corto (circa 1 060 token invece di 1 700) con una tabella "sbagliato → giusto" costruita sugli errori reali dei modelli.
+Solo modelli locali, tramite Ollama, 20 esercizi × 3 ripetizioni per linguaggio (qwen3.8: 1 ripetizione, circa 2 minuti a esercizio). "v1" è la versione 0.1.0 (1° novembre); "v2" è la versione 0.2.0, che aggiunge errori di sintassi con suggerimenti precisi, `result` non più riservato e un manuale più corto (circa 1 060 token invece di 1 700) con una tabella "sbagliato → giusto" costruita sugli errori reali dei modelli.
 
 | Modello | Versione | Tessera risolti | Python risolti | Difetti silenziosi in Python | Tentativi Tessera con errore di sintassi |
 |---|---|---|---|---|---|
@@ -52,15 +52,17 @@ Solo modelli locali, tramite Ollama, 20 esercizi × 3 ripetizioni per linguaggio
 | qwen2.5:3b | v1 | 0 / 60 | 44 / 60 | **37** | 180 / 180 |
 | qwen2.5:3b | v2 | 0 / 60 | 48 / 60 | **30** | 178 / 180 |
 | qwen3.8 (1 solo esercizio) | v1 | 1 / 1, al 2° tentativo | 1 / 1 | 0 | 1 / 2 |
+| qwen3.8 | v2 | **20 / 20** (17 al 1° tentativo) | 20 / 20 | 0 | 3 / 23 |
 
 *Difetti silenziosi*: test nascosti in cui il programma ha restituito un risultato sbagliato senza nessun errore.
 
 **Cosa dicono, onestamente:**
 
-- **I modelli molto piccoli (3-4 miliardi) non imparano Tessera da un manuale nel prompt**, nemmeno migliorato. Un modello locale più grande (qwen3.8, 27 miliardi) ha scritto Tessera corretto dopo un solo errore del compilatore.
+- **I modelli molto piccoli (3-4 miliardi) non imparano Tessera da un manuale nel prompt**, nemmeno migliorato. Un modello locale più grande sì: **qwen3.8 (27 miliardi) ha risolto tutti i 20 esercizi in Tessera sulla v2**, 17 al primo tentativo, superando tutti i 117 test nascosti. I suoi unici 3 errori sono lo stesso, `else do` invece di `else`, corretto subito grazie al suggerimento.
 - **Gli interventi mirati funzionano sull'abitudine che colpiscono**: `let mut` (da Rust) è passato da 34 e 68 casi a 0 e 1; `then`, `::` e le chiusure `|x|` sono calati molto. Ma ogni programma contiene diverse abitudini *diverse* (`!x`, `.unwrap()`, `as i64`, metodi inventati), il parser si ferma al primo errore, e tre tentativi non bastano a superarle tutte.
 - Alcune regole un modello da 3 miliardi non le assorbe affatto: qwen2.5:3b ha omesso `effects:` in 122 tentativi su 180, nonostante manuale, tabella e suggerimenti.
 - In Python i modelli piccoli risolvono la maggior parte degli esercizi, ma lasciano **30-37 difetti silenziosi** per corsa, soprattutto negli esercizi di sicurezza: proprio il problema che Tessera vuole risolvere.
+- **Con qwen3.8 gli esercizi non distinguono più i linguaggi**: anche in Python ha risolto 20 esercizi su 20 al primo tentativo, senza difetti silenziosi. I 20 esercizi sono troppo facili per un modello da 27 miliardi; per capire se Tessera protegge ancora, ai modelli grandi servono esercizi più difficili. Tessera costa anche di più: circa 2,3 volte i token di uscita e, per il manuale nel prompt, circa 10 volte quelli di ingresso.
 - **Rumore**: il prompt di Python non è cambiato tra v1 e v2, eppure qwen2.5:3b è passato da 44 a 48 esercizi risolti. Differenze di pochi esercizi sono variazione casuale, non un effetto.
 - **Correzione**: i 9 errori attribuiti il 1° novembre alla parola riservata `result` erano in realtà tutti `let mut result`. Liberare `result` resta giusto: nelle espressioni veniva interpretato in silenzio come il valore restituito.
 
@@ -68,6 +70,6 @@ Solo modelli locali, tramite Ollama, 20 esercizi × 3 ripetizioni per linguaggio
 
 1. **Segnalare tutti gli errori di sintassi insieme**, non solo il primo, così un modello piccolo può correggere più abitudini a ogni tentativo.
 2. **Generazione vincolata dalla grammatica** (llama.cpp): renderebbe impossibili questi errori di sintassi, e per i modelli da 3-4 miliardi è probabilmente indispensabile.
-3. Lanciare **qwen3.8** di notte sulla v2 (circa 7 ore): la misura decisiva su un modello abbastanza grande da scrivere Tessera.
+3. **Esercizi più difficili** per i modelli da 20 miliardi in su (qwen3.8 li ha risolti tutti e 20 in entrambi i linguaggi), e una decisione su `else do`: l'unico errore di qwen3.8, lo specchio naturale di `if ... do`.
 4. **Addestramento di un modello piccolo (avviato)**: il sistema è in [training/](training/). Prossimo passo: generare circa 300 esercizi nuovi e le loro soluzioni con qwen3.8 di notte, addestrare gemma3:4b con QLoRA e rifare lo stesso esperimento, per il confronto con lo 0/60 di partenza.
 5. Messaggi in inglese anche per gli altri errori (tipi, effetti, contratti); controllo statico dei tipi; compilatore WebAssembly più completo.
