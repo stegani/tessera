@@ -1,107 +1,110 @@
-# Esperimento della fase 1: Tessera contro Python
+# Phase 1 experiment: Tessera versus Python
 
-L'esperimento misura la tesi del paper (sezione 13): **un modello linguistico scrive codice Tessera più corretto e più sicuro che in Python, pur non avendo mai visto Tessera prima?**
+*English · [Italiano](README.it.md)*
 
-## Come funziona
+The experiment tests the thesis of the paper (section 13): **does a language model write more correct and more secure code in Tessera than in Python, even though it has never seen Tessera before?**
 
-1. Lo stesso modello riceve gli stessi 20 esercizi in Tessera e in Python, con la stessa descrizione e gli stessi esempi. Per Tessera il prompt di sistema contiene anche il [manuale del linguaggio](tessera_reference.md), circa 1 700 token, perché il modello non lo conosce.
-2. Il codice viene eseguito sui **test visibili**, gli esempi del prompt. Se fallisce, il modello riceve l'errore (del compilatore o dei test) e riprova, fino a 3 tentativi.
-3. La soluzione finale viene eseguita sui **test nascosti**, che il modello non vede mai: casi limite come input vuoti, overflow, percorsi con `..`, caratteri non ASCII.
-4. Si ripete tutto 3 volte per esercizio, perché le risposte di un modello variano.
+## How it works
 
-Metà degli esercizi riguarda la sicurezza: validazione degli input, overflow, percorsi che escono dalla cartella, escape HTML, limitazione delle richieste.
+1. The same model gets the same 20 tasks in Tessera and in Python, with the same description and the same examples. For Tessera the system prompt also contains the [language manual](tessera_reference.md), about 1 060 tokens, because the model does not know the language.
+2. The code runs on the **visible tests**, the examples in the prompt. If it fails, the model gets the error (from the compiler or from the tests) and tries again, up to 3 attempts.
+3. The final solution runs on the **hidden tests**, which the model never sees: edge cases such as empty input, overflow, paths with `..`, non-ASCII characters.
+4. Everything is repeated 3 times per task, because a model's answers vary.
 
-## Cosa si misura
+Half of the tasks are about security: input validation, overflow, paths that escape a folder, HTML escaping, rate limiting.
 
-| Metrica | Significato |
+## What is measured
+
+| Metric | Meaning |
 |---|---|
-| Risolti al primo tentativo | il codice passa gli esempi senza correzioni |
-| Risolti entro il limite | passano gli esempi entro 3 tentativi |
-| Tentativi medi | quanti giri servono, usando gli errori del compilatore |
-| Test nascosti superati | robustezza sui casi limite, tra gli esercizi risolti |
-| **Difetti silenziosi** | test nascosti con un risultato sbagliato **senza alcun errore**: sono le vulnerabilità vere |
-| Difetti che fermano il programma | test nascosti in cui il programma si è fermato con un errore (overflow, contratto, indice) |
-| Token e costo | token di ingresso e uscita per esercizio, e costo stimato |
+| Solved at the first attempt | the code passes the examples without corrections |
+| Solved within the limit | the examples pass within 3 attempts |
+| Average attempts | how many rounds it takes, using the compiler's errors |
+| Hidden tests passed | robustness on edge cases, among the solved tasks |
+| **Silent defects** | hidden tests with a wrong result **and no error at all**: these are the real vulnerabilities |
+| Defects that stop the program | hidden tests where the program stopped with an error (overflow, contract, index) |
+| Tokens and cost | input and output tokens per task, and estimated cost |
 
-La distinzione tra difetti silenziosi e difetti che fermano il programma è il cuore della tesi. Per esempio, una somma senza controlli in Python dà un numero sbagliato; la stessa somma in Tessera si ferma con un errore di overflow.
+The difference between silent defects and defects that stop the program is the heart of the thesis. For example, an unchecked sum in Python gives a wrong number; the same sum in Tessera stops with an overflow error.
 
-## Come lanciarlo
+## How to run it
 
-Dalla cartella del progetto, con l'ambiente attivo:
+From the project folder, with the environment active:
 
 ```bash
 python -m experiment check
 ```
 
-Verifica che le 40 soluzioni di riferimento, 20 esercizi in 2 linguaggi, superino tutti i 156 test di ciascun linguaggio.
+Checks that the 40 reference solutions (20 tasks in 2 languages) pass all 156 tests of each language.
 
 ```bash
 python -m experiment run --model reference --reps 1
 ```
 
-Prova tutto il ciclo **senza costi**, usando le soluzioni di riferimento al posto del modello. Con `--model reference-broken` il primo tentativo è volutamente sbagliato, così si prova anche il ciclo di correzione.
+Runs the whole loop **at no cost**, using the reference solutions instead of a model. With `--model reference-broken` the first attempt is deliberately wrong, so the correction loop is tested too.
 
-### Con un modello locale (consigliato)
+### With a local model (recommended)
 
-Tessera è pensato soprattutto per le IA locali, quindi l'esperimento parte da lì: niente costi, niente account, i dati restano sul tuo computer.
+Tessera is designed above all for local AI, so the experiment starts there: no costs, no accounts, and the data stays on your computer.
 
-Con [Ollama](https://ollama.com), che è il predefinito:
+With [Ollama](https://ollama.com), the default:
 
 ```bash
 python -m experiment run --model ollama:qwen3.8
 ```
 
-Con [LM Studio](https://lmstudio.ai): carica il modello, avvia il server locale (porta 1234) e usa il nome del modello mostrato da LM Studio.
+With [LM Studio](https://lmstudio.ai): load the model, start the local server (port 1234) and use the model name shown by LM Studio.
 
 ```bash
-python -m experiment run --model lmstudio:NOME_DEL_MODELLO
+python -m experiment run --model lmstudio:MODEL_NAME
 ```
 
-Il nome dopo `ollama:` è quello mostrato da `ollama list`. Per Ollama il banco di prova chiede un contesto di 16 384 token; in LM Studio la lunghezza del contesto si imposta quando si carica il modello: almeno 8 192 token, perché il manuale di Tessera da solo ne occupa circa 1 700. I modelli locali sono più lenti dei servizi commerciali, ma il confronto resta equo: a parità di modello cambia solo il linguaggio.
+The name after `ollama:` is the one shown by `ollama list`. For Ollama the test bench asks for a 16 384-token context; in LM Studio the context length is set when the model is loaded: at least 8 192 tokens. Local models are slower than commercial services, but the comparison stays fair: with the same model, only the language changes.
 
-### Con un modello commerciale (facoltativo)
+### With a commercial model (optional)
 
-Chi vuole può confrontare anche i modelli commerciali. Le chiamate hanno un costo, quindi il comando parte solo con `--yes`; senza, mostra quante chiamate farebbe.
+Anyone who wants can also compare commercial models. The calls cost money, so the command only starts with `--yes`; without it, it shows how many calls it would make.
 
-Qualsiasi servizio con un'interfaccia compatibile con OpenAI (OpenAI, Mistral, OpenRouter e altri): la chiave si legge da una variabile d'ambiente, di cui si passa solo il nome.
+Any service with an OpenAI-compatible interface (OpenAI, Mistral, OpenRouter and others): the key is read from an environment variable, and you pass only its name.
 
 ```bash
-python -m experiment run --model compat:NOME_DEL_MODELLO --base-url https://api.openai.com/v1 --api-key-env OPENAI_API_KEY --yes
+python -m experiment run --model compat:MODEL_NAME --base-url https://api.openai.com/v1 --api-key-env OPENAI_API_KEY --yes
 ```
 
-Claude, con l'SDK ufficiale di Anthropic: imposta `ANTHROPIC_API_KEY` oppure accedi con `ant auth login`.
+Claude, with Anthropic's official SDK: set `ANTHROPIC_API_KEY` or sign in with `ant auth login`.
 
 ```bash
 python -m experiment run --model claude-opus-5-5 --yes
 ```
 
-Opzioni utili: `--reps 1`, `--effort medium` (solo Claude), `--tasks parse_int_safe,checked_sum`. Se l'esperimento si interrompe, rilanciandolo con lo stesso `--out` riprende da dove si era fermato.
+Useful options: `--reps 1`, `--effort medium` (Claude only), `--tasks parse_int_safe,checked_sum`. If the experiment stops, running it again with the same `--out` resumes where it left off.
 
-I risultati finiscono in `experiment/results/` (esclusa da git): un file `.jsonl` con ogni tentativo e un rapporto `.md` con le tabelle. Per rigenerare il rapporto:
+Results go to `experiment/results/` (excluded from git): a `.jsonl` file with every attempt and a `.md` report with the tables. To regenerate the report:
 
 ```bash
 python -m experiment report experiment/results/FILE.jsonl
 ```
 
-## Costo e tempi
+## Cost and time
 
-Con un modello locale l'esperimento non costa nulla, ma richiede tempo. Su un PC con una scheda RTX 4060 (8 GB), un modello da 3-4 miliardi di parametri sta tutto nella scheda video ed è veloce. qwen3.8 (27 miliardi) gira in parte sul processore, a circa 5 token al secondo: una ripetizione completa richiede circa 7 ore, da lanciare di notte.
+With a local model the experiment costs nothing, but it takes time. On a PC with an RTX 4060 (8 GB), a 3-4 billion parameter model fits entirely on the graphics card and is fast. qwen3.8 runs partly on the processor, at about 5 tokens per second: one full repetition takes about 7 hours, best run overnight.
 
-Con Claude Opus 5.5 (20 esercizi × 2 linguaggi × 3 ripetizioni, da 120 a 360 chiamate) il costo stimato è intorno ai 10-20 dollari. Il rapporto finale riporta il costo calcolato sui token effettivi per i modelli Claude.
+With Claude Opus 5.5 (20 tasks × 2 languages × 3 repetitions, 120 to 360 calls) the estimated cost is around 10-20 dollars. The final report gives the cost computed on the actual tokens for Claude models.
 
-## Correttezza e limiti
+## Fairness and limits
 
-- **Equità**: stesso modello, stessa descrizione, stessi esempi, stesso numero di tentativi. I linguaggi sono alternati esercizio per esercizio.
-- **Esecuzione isolata**: il codice gira in un processo separato, con un limite di 10 secondi. Per il Python generato valgono in più queste regole:
-  - sono consentiti solo moduli innocui (`math`, `re`, `collections`…);
-  - sono vietati file, rete, `eval` e introspezione.
+- **Fairness**: same model, same description, same examples, same number of attempts. The two languages alternate task by task.
+- **Isolated execution**: the code runs in a separate process with a 10-second limit. Generated Python also has these rules:
+  - only harmless modules are allowed (`math`, `re`, `collections`…);
+  - files, network, `eval` and introspection are forbidden.
 
-  Non è una sandbox completa: per esecuzioni su larga scala conviene usare un container. Il codice Tessera non ha bisogno di questo filtro, perché il linguaggio rifiuta da solo gli effetti non dichiarati.
-- **Fallback**: se il modello rifiuta una richiesta, il fallback lato server la ripete su un altro modello. Ogni tentativo registra quale modello ha risposto davvero, e il rapporto conta quante risposte vengono da un fallback. Per escluderlo usa `--no-fallback`.
-- **Confronti noti**:
-  - i messaggi d'errore di Tessera sono in italiano, mentre quelli di Python sono in inglese;
-  - il prompt di Tessera è più lungo, per via del manuale;
-  - Python ha alle spalle anni di dati di addestramento, Tessera nessuno.
+  It is not a complete sandbox: for large-scale runs, use a container. Tessera code does not need this filter, because the language itself rejects undeclared effects.
+- **Fallback**: if the model refuses a request, the server-side fallback repeats it on another model. Every attempt records which model actually answered, and the report counts how many answers come from a fallback. To exclude it, use `--no-fallback`.
+- **Known imbalances**:
+  - Tessera's syntax errors are in English with a hint, but some other error messages are still in Italian, while Python's are in English;
+  - the Tessera prompt is longer, because of the manual;
+  - Python has years of training data behind it, Tessera none.
 
-  Sono svantaggi per Tessera: se vince lo stesso, il risultato è più solido.
-- **Dimensione**: 20 esercizi bastano per vedere una tendenza, non per una conclusione statistica forte. Il paper prevede da 30 a 50 esercizi: se ne aggiungono altri in [tasks.json](tasks.json), con la soluzione di riferimento in [references.py](references.py).
+  These are disadvantages for Tessera: if it wins anyway, the result is stronger.
+- **Size**: 20 tasks are enough to see a trend, not for a strong statistical conclusion. The paper plans 30 to 50 tasks: add more in [tasks.json](tasks.json), with the reference solution in [references.py](references.py).
+- **Prompt version**: every result records a short fingerprint of the system prompt (`prompt_version`), so runs made with different manuals are never mixed up.

@@ -11,7 +11,8 @@
 | Interprete e controlli statici | prototipo 0.2: nucleo completo, effetti, contratti, `edit`/`take`, permessi sui file, sentinella hardware |
 | Compilatore WebAssembly | prototipo 0.2: funzioni pure su `i32`, `i64`, `f64`, `bool`, confrontato con l'interprete su 1 500 chiamate casuali |
 | Esperimento della fase 1 | pronto; primi risultati con modelli locali (vedi sotto) ([experiment/](experiment/)) |
-| Test | 61, tutti superati |
+| Addestramento dei modelli piccoli | avviato: dati verificati dal compilatore, addestramento QLoRA ed esportazione in Ollama ([training/](training/)) |
+| Test | 76, tutti superati |
 | Pubblicazione | repository pubblica, Apache 2.0, DOI [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820) |
 
 ## Direzione: un linguaggio per le IA locali
@@ -65,5 +66,5 @@ Solo modelli locali, tramite Ollama, 20 esercizi × 3 ripetizioni per linguaggio
 1. **Segnalare tutti gli errori di sintassi insieme**, non solo il primo, così un modello piccolo può correggere più abitudini a ogni tentativo.
 2. **Generazione vincolata dalla grammatica** (llama.cpp): renderebbe impossibili questi errori di sintassi, e per i modelli da 3-4 miliardi è probabilmente indispensabile.
 3. Lanciare **qwen3.8** di notte sulla v2 (circa 7 ore): la misura decisiva su un modello abbastanza grande da scrivere Tessera.
-4. Dati di addestramento generati e verificati dal compilatore, per un adattamento LoRA di un modello piccolo.
+4. **Addestramento di un modello piccolo (avviato)**: il sistema è in [training/](training/). Prossimo passo: generare circa 300 esercizi nuovi e le loro soluzioni con qwen3.8 di notte, addestrare gemma3:4b con QLoRA e rifare lo stesso esperimento, per il confronto con lo 0/60 di partenza.
 5. Messaggi in inglese anche per gli altri errori (tipi, effetti, contratti); controllo statico dei tipi; compilatore WebAssembly più completo.

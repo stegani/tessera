@@ -67,7 +67,7 @@ python -m tessera esegui examples/checkout.tsr
 | `python -m tessera prova file.tsr` | esegue le clausole `example` come test |
 | `python -m tessera compila file.tsr -o build` | produce `.wat` e `.wasm` |
 | `python -m tessera chiama file.tsr funzione arg... [--wasm]` | chiama una funzione, interpretata o compilata |
-| `python -m pytest tests` | 61 test, compresa la prova differenziale interprete contro WebAssembly |
+| `python -m pytest tests` | 76 test, compresa la prova differenziale interprete contro WebAssembly |
 
 Cosa controlla già il prototipo: effetti dichiarati, contratti, tipi ai confini delle funzioni, `edit` e `take`, overflow, divisione per zero, permessi sui file del `process`, `Secret` mai stampati, `Result` mai ignorati, `match` esaustivi, requisiti di piattaforma. Le regole sono in [spec/semantics.md](spec/semantics.md).
 
@@ -82,6 +82,7 @@ Cosa controlla già il prototipo: effetti dichiarati, contratti, tipi ai confini
 | [tessera/](tessera/) | Il prototipo: analizzatore, interprete, controlli statici, compilatore WebAssembly, sentinella |
 | [examples/](examples/) | Programmi `.tsr`. Eseguibili: `hello`, `checkout`, `prices`, `warehouse`, `permissions`, `numbers`. Illustrativi (usano moduli non ancora scritti): `server`, `training`, `interop` |
 | [experiment/](experiment/) | Esperimento della fase 1: 20 esercizi con test nascosti sui casi limite, scritti dallo stesso modello in Tessera e in Python; gira con modelli locali (Ollama, LM Studio), i modelli commerciali sono facoltativi |
+| [training/](training/) | Addestramento dei modelli piccoli su Tessera: esercizi e soluzioni verificati dal compilatore, addestramento QLoRA, esportazione in Ollama |
 | [tests/](tests/) | Test del prototipo |
 | [tools/check_grammar.py](tools/check_grammar.py) | Verifica la grammatica sugli esempi e su 14 errori tipici che deve rifiutare |
 

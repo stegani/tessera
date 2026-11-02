@@ -11,7 +11,8 @@
 | Interpreter and static checks | prototype 0.2: full language core, effects, contracts, `edit`/`take`, file permissions, hardware sentinel |
 | WebAssembly compiler | prototype 0.2: pure functions on `i32`, `i64`, `f64`, `bool`, checked against the interpreter on 1 500 random calls |
 | Phase 1 experiment | ready; first local results in (see below) ([experiment/](experiment/)) |
-| Tests | 61, all passing |
+| Training of small models | started: data verified by the compiler, QLoRA training and export to Ollama ([training/](training/)) |
+| Tests | 76, all passing |
 | Publication | public repository, Apache 2.0, DOI [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820) |
 
 ## Direction: built for local AI
@@ -65,5 +66,5 @@ Local models only, via Ollama, 20 tasks × 3 repetitions per language. "v1" is v
 1. **Report every syntax error at once** instead of only the first, so a small model can fix several habits per attempt.
 2. **Grammar-constrained generation** (llama.cpp): it would make these syntax errors impossible, and is likely essential for 3-4B models.
 3. Run **qwen3.8** overnight on v2 (about 7 hours): the decisive measurement on a model large enough to write Tessera.
-4. Training data generated and verified by the compiler, for a LoRA adaptation of a small model.
+4. **Training a small model (started)**: the pipeline is in [training/](training/). Next: generate about 300 new tasks and their solutions with qwen3.8 overnight, train gemma3:4b with QLoRA, and run the same experiment again to compare with the 0/60 "before".
 5. English messages for the remaining errors (types, effects, contracts); static type checker; fuller WebAssembly compiler.

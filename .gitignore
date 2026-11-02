@@ -19,3 +19,8 @@ build/
 
 # Risultati dell'esperimento (si pubblicano solo per scelta)
 experiment/results/
+.venv-train/
+
+# Dati e corse dell'addestramento (pesanti; si pubblicano solo per scelta)
+training/data/
+training/runs/
