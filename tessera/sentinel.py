@@ -1,4 +1,4 @@
-# Copyright 2026 Stefano Stegani
+# Copyright 2026 Stefano Stegani - Airgrid Network - www.airgrid.it
 # SPDX-License-Identifier: Apache-2.0
 """Sentinella hardware, versione minima: controlla la clausola platform di un process prima dell'avvio.
 

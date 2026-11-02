@@ -1,4 +1,4 @@
-# Copyright 2026 Stefano Stegani
+# Copyright 2026 Stefano Stegani - Airgrid Network - www.airgrid.it
 # SPDX-License-Identifier: Apache-2.0
 """Esercizi di addestramento, nello stesso formato di experiment/tasks.json.
 
@@ -287,6 +287,9 @@ def genera(modello, n, valutazione, esistenti, scrivi, seme=None, stampa=print):
             task = da_proposta(risposta.testo, genere, valutazione, esistenti)
         except Scartato as e:
             stampa(f"[{validi}/{n}] scartato ({genere}, {tema}): {e}")
+            continue
+        except OSError as e:            # tempo scaduto o server non raggiungibile
+            stampa(f"[{validi}/{n}] nessuna risposta dal modello: {e}")
             continue
         task["topic"] = tema
         scrivi(task)

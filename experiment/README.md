@@ -2,6 +2,8 @@
 
 *English · [Italiano](README.it.md)*
 
+Created by **Stefano Stegani - Airgrid Network - [www.airgrid.it](https://www.airgrid.it)**
+
 The experiment tests the thesis of the paper (section 13): **does a language model write more correct and more secure code in Tessera than in Python, even though it has never seen Tessera before?**
 
 ## How it works

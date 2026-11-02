@@ -1,4 +1,4 @@
-# Copyright 2026 Stefano Stegani
+# Copyright 2026 Stefano Stegani - Airgrid Network - www.airgrid.it
 # SPDX-License-Identifier: Apache-2.0
 """Addestramento QLoRA di un modello piccolo sui dati verificati (da eseguire con l'ambiente .venv-train).
 

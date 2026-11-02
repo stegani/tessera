@@ -1,4 +1,4 @@
-# Copyright 2026 Stefano Stegani
+# Copyright 2026 Stefano Stegani - Airgrid Network - www.airgrid.it
 # SPDX-License-Identifier: Apache-2.0
 """Soluzioni in Tessera scritte da un modello insegnante e verificate dal compilatore e dai test.
 

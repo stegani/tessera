@@ -1,4 +1,4 @@
-# Copyright 2026 Stefano Stegani
+# Copyright 2026 Stefano Stegani - Airgrid Network - www.airgrid.it
 # SPDX-License-Identifier: Apache-2.0
 """Suggerimenti per gli errori di sintassi: dicono esattamente cosa scrivere.
 

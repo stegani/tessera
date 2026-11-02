@@ -12,6 +12,8 @@
 **A programming language written by AI, hardened against AI.**
 Declared effects, verified contracts, vulnerabilities that don't compile.
 
+Created by **Stefano Stegani - Airgrid Network - [www.airgrid.it](https://www.airgrid.it)**.
+
 AI systems write more and more code, and the same abilities can find its flaws at enormous scale. Tessera moves security from the programmer to the compiler: whatever an AI could get wrong or exploit should become a compile error.
 
 ```
@@ -57,6 +59,8 @@ Full status, the decisions taken so far and the next steps: **[STATUS.md](STATUS
 
 ## Try it
 
+To learn the language, read the **[user manual](docs/manual.md)** (also as [PDF](docs/manual.pdf)).
+
 ```bash
 python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt
@@ -75,7 +79,7 @@ python -m tessera run examples/checkout.tsr
 | `python -m tessera test file.tsr` | runs the `example` clauses as tests |
 | `python -m tessera build file.tsr -o build` | produces `.wat` and `.wasm` |
 | `python -m tessera call file.tsr function arg... [--wasm]` | calls a function, interpreted or compiled |
-| `python -m pytest tests` | 76 tests, including differential testing of the interpreter against WebAssembly |
+| `python -m pytest tests` | 99 tests, including differential testing of the interpreter against WebAssembly |
 
 The prototype already enforces: declared effects, contracts, types at function boundaries, `edit` and `take`, integer overflow, division by zero, file permissions granted by the `process`, `Secret` values never printed, `Result` values never ignored, exhaustive `match`, platform requirements. Messages and documentation are currently in Italian; the rules are in [spec/semantics.md](spec/semantics.md).
 
@@ -84,6 +88,7 @@ The prototype already enforces: declared effects, contracts, types at function b
 | Path | Contents |
 |---|---|
 | [docs/paper.md](docs/paper.md) | The paper: motivation, architecture, security model, evaluation |
+| [docs/manual.md](docs/manual.md) | User manual: writing Tessera by hand ([PDF](docs/manual.pdf); Italian: [manual.it.md](docs/manual.it.md), [PDF](docs/manual.it.pdf)) |
 | [spec/syntax.md](spec/syntax.md) | Syntax decisions, with rationale and token measurements |
 | [spec/semantics.md](spec/semantics.md) | Execution rules decided while building the prototype |
 | [spec/tessera.lark](spec/tessera.lark) | The formal grammar (LALR(1)) |
@@ -96,11 +101,11 @@ The prototype already enforces: declared effects, contracts, types at function b
 
 ## Author and citation
 
-Tessera is an original idea by **Stefano Stegani**, who wrote its design, grammar and paper. The code and texts may be reused, including commercially, under the license terms: **anyone redistributing Tessera or a derivative work must keep the [NOTICE](NOTICE) file, which credits the author**, and may not present it as their own.
+Tessera is an original idea by **Stefano Stegani - Airgrid Network - [www.airgrid.it](https://www.airgrid.it)**, who wrote its design, grammar and paper. The code and texts may be reused, including commercially, under the license terms: **anyone redistributing Tessera or a derivative work must keep the [NOTICE](NOTICE) file, which credits the author**, and may not present it as their own.
 
 To cite the project:
 
-> Stefano Stegani, *Tessera: written by AI, hardened against AI*, 2026. DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820)
+> Stefano Stegani - Airgrid Network - www.airgrid.it, *Tessera: written by AI, hardened against AI*, 2026. DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820)
 
 The DOI always points to the latest version. Each version also has its own DOI, archived on Zenodo: 0.2.0 [10.5281/zenodo.23881717](https://doi.org/10.5281/zenodo.23881717), 0.1.0 [10.5281/zenodo.23855821](https://doi.org/10.5281/zenodo.23855821).
 

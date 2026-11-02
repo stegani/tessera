@@ -1,8 +1,8 @@
 # Tessera: scritto dalle IA, blindato contro le IA
 
-Stefano Stegani · 1 novembre 2026
+Stefano Stegani - Airgrid Network - [www.airgrid.it](https://www.airgrid.it) · 1 novembre 2026
 
-© 2026 Stefano Stegani. Distribuito con licenza Apache 2.0: si può riusare citando l'autore (vedi il file NOTICE).
+© 2026 Stefano Stegani - Airgrid Network - www.airgrid.it. Distribuito con licenza Apache 2.0: si può riusare citando l'autore (vedi il file NOTICE).
 
 ## Abstract
 
@@ -565,8 +565,8 @@ Pagine ufficiali dei progetti e degli standard citati; i collegamenti non sono s
 
 ## Come citare
 
-Tessera è un'opera originale di Stefano Stegani, distribuita con licenza Apache 2.0: si può riusare citando sempre l'autore.
+Tessera è un'opera originale di Stefano Stegani - Airgrid Network - www.airgrid.it, distribuita con licenza Apache 2.0: si può riusare citando sempre l'autore.
 
-Stefano Stegani, *Tessera: scritto dalle IA, blindato contro le IA*, 2026. [github.com/stegani/tessera](https://github.com/stegani/tessera)
+Stefano Stegani - Airgrid Network - www.airgrid.it, *Tessera: written by AI, hardened against AI*, 2026. DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820). [github.com/stegani/tessera](https://github.com/stegani/tessera)
 
 DOI: [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820), archiviato su Zenodo il 1 novembre 2026. Il DOI punta sempre all'ultima versione; la versione 0.1.0 ha il DOI [10.5281/zenodo.23855821](https://doi.org/10.5281/zenodo.23855821), la 0.2.0 il DOI [10.5281/zenodo.23881717](https://doi.org/10.5281/zenodo.23881717).

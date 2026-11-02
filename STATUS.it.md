@@ -2,17 +2,20 @@
 
 *[English](STATUS.md) · Italiano* · ultimo aggiornamento: 2 novembre 2026
 
+Creato da **Stefano Stegani - Airgrid Network - [www.airgrid.it](https://www.airgrid.it)**
+
 ## A che punto siamo
 
 | Area | Stato |
 |---|---|
 | Paper di progetto | fatto, 16 sezioni ([docs/paper.md](docs/paper.md)) |
+| Manuale per l'utente | per scrivere Tessera a mano, in inglese e in italiano, anche in PDF; ogni programma è controllato dai test ([docs/manual.it.md](docs/manual.it.md)) |
 | Sintassi e grammatica formale | fatte, LALR(1) senza conflitti ([spec/syntax.md](spec/syntax.md), [spec/tessera.lark](spec/tessera.lark)) |
 | Interprete e controlli statici | prototipo 0.2: nucleo completo, effetti, contratti, `edit`/`take`, permessi sui file, sentinella hardware |
 | Compilatore WebAssembly | prototipo 0.2: funzioni pure su `i32`, `i64`, `f64`, `bool`, confrontato con l'interprete su 1 500 chiamate casuali |
 | Esperimento della fase 1 | pronto; primi risultati con modelli locali (vedi sotto) ([experiment/](experiment/)) |
 | Addestramento dei modelli piccoli | avviato: dati verificati dal compilatore, addestramento QLoRA ed esportazione in Ollama ([training/](training/)) |
-| Test | 76, tutti superati |
+| Test | 99, tutti superati |
 | Pubblicazione | repository pubblica, Apache 2.0, DOI [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820) |
 
 ## Direzione: un linguaggio per le IA locali

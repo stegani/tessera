@@ -1,4 +1,4 @@
-// Copyright 2026 Stefano Stegani
+// Copyright 2026 Stefano Stegani - Airgrid Network - www.airgrid.it
 // SPDX-License-Identifier: Apache-2.0
 // Grammatica di Tessera, bozza 0.2 (01/11/2026).
 // Le parti facoltative tra [ ] lasciano un segnaposto None nell'albero: le posizioni restano fisse.

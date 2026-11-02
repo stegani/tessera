@@ -2,17 +2,20 @@
 
 *English · [Italiano](STATUS.it.md)* · last updated: 2 November 2026
 
+Created by **Stefano Stegani - Airgrid Network - [www.airgrid.it](https://www.airgrid.it)**
+
 ## Where the project stands
 
 | Area | Status |
 |---|---|
 | Design paper | done, 16 sections ([docs/paper.md](docs/paper.md)) |
+| User manual | for writing Tessera by hand, in English and Italian, also as PDF; every program in it is checked by the tests ([docs/manual.md](docs/manual.md)) |
 | Syntax and formal grammar | done, LALR(1) without conflicts ([spec/syntax.md](spec/syntax.md), [spec/tessera.lark](spec/tessera.lark)) |
 | Interpreter and static checks | prototype 0.2: full language core, effects, contracts, `edit`/`take`, file permissions, hardware sentinel |
 | WebAssembly compiler | prototype 0.2: pure functions on `i32`, `i64`, `f64`, `bool`, checked against the interpreter on 1 500 random calls |
 | Phase 1 experiment | ready; first local results in (see below) ([experiment/](experiment/)) |
 | Training of small models | started: data verified by the compiler, QLoRA training and export to Ollama ([training/](training/)) |
-| Tests | 76, all passing |
+| Tests | 99, all passing |
 | Publication | public repository, Apache 2.0, DOI [10.5281/zenodo.23855820](https://doi.org/10.5281/zenodo.23855820) |
 
 ## Direction: built for local AI

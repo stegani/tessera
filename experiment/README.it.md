@@ -2,6 +2,8 @@
 
 *[English](README.md) · Italiano*
 
+Creato da **Stefano Stegani - Airgrid Network - [www.airgrid.it](https://www.airgrid.it)**
+
 L'esperimento misura la tesi del paper (sezione 13): **un modello linguistico scrive codice Tessera più corretto e più sicuro che in Python, pur non avendo mai visto Tessera prima?**
 
 ## Come funziona

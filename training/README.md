@@ -2,6 +2,8 @@
 
 *English · [Italiano](README.it.md)*
 
+Created by **Stefano Stegani - Airgrid Network - [www.airgrid.it](https://www.airgrid.it)**
+
 The phase 1 experiment showed that a 3-4 billion parameter model cannot learn Tessera from a manual in the prompt alone. This folder teaches it with **training data verified by the compiler**: every example is a Tessera program that the compiler accepts and that passes every test of its task. A wrong example cannot get in.
 
 Everything runs locally: a larger local model acts as the teacher, and the small model is trained on your own graphics card (an 8 GB card is enough).

@@ -5,6 +5,8 @@ type: software
 authors:
   - family-names: Stegani
     given-names: Stefano
+    affiliation: "Airgrid Network - www.airgrid.it"
+    website: "https://www.airgrid.it"
 version: 0.2.0
 doi: 10.5281/zenodo.23855820
 identifiers:

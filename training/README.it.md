@@ -2,6 +2,8 @@
 
 *[English](README.md) · Italiano*
 
+Creato da **Stefano Stegani - Airgrid Network - [www.airgrid.it](https://www.airgrid.it)**
+
 L'esperimento della fase 1 ha mostrato che un modello da 3-4 miliardi di parametri non impara Tessera solo da un manuale nel prompt. Questa cartella glielo insegna con **dati di addestramento verificati dal compilatore**: ogni esempio è un programma Tessera che il compilatore accetta e che supera tutti i test del suo esercizio. Un esempio sbagliato non può entrare.
 
 Tutto gira in locale: un modello locale più grande fa da insegnante, e il modello piccolo si addestra sulla tua scheda video (bastano 8 GB).

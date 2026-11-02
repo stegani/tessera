@@ -1,4 +1,4 @@
-# Copyright 2026 Stefano Stegani
+# Copyright 2026 Stefano Stegani - Airgrid Network - www.airgrid.it
 # SPDX-License-Identifier: Apache-2.0
 """Il ciclo dell'esperimento: richiesta, esecuzione sui test visibili, correzione, test nascosti."""
 import hashlib
